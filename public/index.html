@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bayesian Hypothesis Tracker</title>
+<style>
+:root {
+  --bg:       #09101f;
+  --surface:  #101827;
+  --border:   #1b2537;
+  --text:     #dce8f5;
+  --muted:    #4a6070;
+  --accent:   #3b82f6;
+  --c0: #22d3ee;  /* H1 cyan   */
+  --c1: #f87171;  /* H2 red    */
+  --c2: #fbbf24;  /* H3 yellow */
+  --c3: #a78bfa;  /* H4 purple */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 3.5rem 1.5rem;
+  gap: 1.5rem;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.app-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.live-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.3rem 0.85rem;
+}
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: blink 2s infinite;
+}
+.live-dot.off { background: #ef4444; animation: none; }
+@keyframes blink { 0%,100% { opacity:1 } 50% { opacity:.25 } }
+
+/* ── Evidence card ── */
+.evidence-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 60px;
+}
+.step-tag {
+  flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.9rem;
+  border-radius: 20px;
+}
+.evidence-text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ── Bars ── */
+.hypotheses {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.1rem;
+}
+
+.h-row {
+  display: grid;
+  grid-template-columns: 260px 1fr 92px;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.h-label {
+  text-align: right;
+  line-height: 1.35;
+}
+.h-label-id {
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.h-label-name {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.bar-track {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  height: 52px;
+  overflow: hidden;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 7px;
+  width: 0%;
+  transition: width 0.85s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+/* shimmer highlight on right edge */
+.bar-fill::after {
+  content:'';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12));
+  border-radius: 0 7px 7px 0;
+}
+.bar-fill.flash {
+  animation: flash 0.55s ease-out;
+}
+@keyframes flash {
+  0%   { filter: brightness(2.5); }
+  100% { filter: brightness(1); }
+}
+
+.bar-pct {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ── History ── */
+.history-section {
+  border-top: 1px solid var(--border);
+  padding-top: 1.1rem;
+}
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.h-item {
+  display: grid;
+  grid-template-columns: 80px 1fr 200px;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  transition: border-color 0.3s;
+}
+.h-item.current {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.h-item-step { font-weight: 600; font-size: 0.75rem; }
+.h-item-evidence { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-bars { display: flex; gap: 3px; height: 14px; }
+.mini-bar {
+  height: 100%;
+  border-radius: 2px;
+  min-width: 1px;
+  transition: width 0.5s ease;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="app-title">Bayesian Hypothesis Tracker</div>
+  <div class="live-pill">
+    <div class="live-dot off" id="dot"></div>
+    <span id="live-label">Connecting</span>
+  </div>
+</div>
+
+<div class="evidence-card">
+  <span class="step-tag" id="step-tag">—</span>
+  <span class="evidence-text" id="ev-text">等待數據…</span>
+</div>
+
+<div class="hypotheses" id="hypotheses"></div>
+
+<div class="history-section">
+  <div class="section-label">Evidence History</div>
+  <div class="history-list" id="history"></div>
+</div>
+
+<script>
+const COLORS = ['var(--c0)','var(--c1)','var(--c2)','var(--c3)'];
+const GRADS  = [
+  'linear-gradient(90deg,#0e7fa8,#22d3ee)',
+  'linear-gradient(90deg,#b91c1c,#f87171)',
+  'linear-gradient(90deg,#b45309,#fbbf24)',
+  'linear-gradient(90deg,#5b21b6,#a78bfa)',
+];
+
+let initialized = false;
+
+function fmt(v) { return (v * 100).toFixed(1) + '%'; }
+
+function splitLabel(name) {
+  const m = name.match(/^([^\s]+)\s+(.+)$/);
+  return m ? [m[1], m[2]] : [name, ''];
+}
+
+function renderBars(state) {
+  const last = state.steps[state.steps.length - 1];
+  document.getElementById('step-tag').textContent = `Step ${last.step}`;
+  document.getElementById('ev-text').textContent = last.evidence;
+
+  const container = document.getElementById('hypotheses');
+
+  if (!initialized) {
+    container.innerHTML = '';
+    state.hypotheses.forEach((name, i) => {
+      const [id, label] = splitLabel(name);
+      const row = document.createElement('div');
+      row.className = 'h-row';
+      row.innerHTML = `
+        <div class="h-label">
+          <div class="h-label-id">${id}</div>
+          <div class="h-label-name">${label}</div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bf${i}" style="background:${GRADS[i]}"></div>
+        </div>
+        <div class="bar-pct" id="bp${i}" style="color:${COLORS[i]}">0%</div>
+      `;
+      container.appendChild(row);
+    });
+    initialized = true;
+    // Trigger initial animation
+    requestAnimationFrame(() => {
+      last.values.forEach((v, i) => {
+        document.getElementById(`bf${i}`).style.width = `${v.posterior * 100}%`;
+        document.getElementById(`bp${i}`).textContent = fmt(v.posterior);
+      });
+    });
+  } else {
+    last.values.forEach((v, i) => {
+      const bar = document.getElementById(`bf${i}`);
+      const pct = document.getElementById(`bp${i}`);
+      const w = `${v.posterior * 100}%`;
+      if (bar.style.width !== w) {
+        bar.classList.remove('flash');
+        void bar.offsetWidth;
+        bar.classList.add('flash');
+        bar.style.width = w;
+        pct.textContent = fmt(v.posterior);
+      }
+    });
+  }
+}
+
+function renderHistory(state) {
+  const el = document.getElementById('history');
+  el.innerHTML = '';
+  const lastStep = state.steps[state.steps.length - 1].step;
+
+  [...state.steps].reverse().forEach(step => {
+    const isCurrent = step.step === lastStep;
+    const item = document.createElement('div');
+    item.className = 'h-item' + (isCurrent ? ' current' : '');
+
+    const miniBars = state.hypotheses.map((_, i) => {
+      const w = (step.values[i].posterior * 100).toFixed(1);
+      return `<div class="mini-bar" style="width:${w}%;background:${COLORS[i]}"></div>`;
+    }).join('');
+
+    item.innerHTML = `
+      <div class="h-item-step">${step.step === 0 ? '先驗' : `Step ${step.step}`}</div>
+      <div class="h-item-evidence">${step.step === 0 ? '初始先驗分布' : step.evidence}</div>
+      <div class="mini-bars">${miniBars}</div>
+    `;
+    el.appendChild(item);
+  });
+}
+
+function render(state) {
+  renderBars(state);
+  renderHistory(state);
+}
+
+const es = new EventSource('/events');
+
+es.onopen = () => {
+  document.getElementById('dot').classList.remove('off');
+  document.getElementById('live-label').textContent = 'Live';
+};
+
+es.onmessage = e => {
+  render(JSON.parse(e.data));
+};
+
+es.onerror = () => {
+  document.getElementById('dot').classList.add('off');
+  document.getElementById('live-label').textContent = 'Reconnecting';
+};
+</script>
+</body>
+</html>
