@@ -45,7 +45,6 @@ Skill 在每个贝叶斯更新步骤后，把当前概率状态写入一个 JSON
 ### Demo 场景结论
 
 Hackathon 现场选**方法一**：30 分钟内可实现，容错性最好。App 挂了直接退回终端输出，不影响 Live Demo 主流程，契合"mistakes embraced as part of the art"的回退预案。
-
 ## Sharing the status with file, and App listens to them
 ### should we duplicated a dedicated demo skill then? yes
 
@@ -60,3 +59,12 @@ Hackathon 现场选**方法一**：30 分钟内可实现，容错性最好。App
 Hook 方案的问题：Skill → Write 工具 → Hook 脚本 → App → WebSocket → 前端，链路比方法一更长，Hook 脚本挂了行为不确定（可能报错、可能阻塞），Demo 现场排查成本高。
 
 **结论**：复制出 demo-skill，改动只有一处——每次概率更新后加一行写 JSON 文件。逻辑极简单，原版 Skill 保持不动，Demo 稳定性最优。
+
+### NEXT: 
+1. Design the UI with a Thomas' time style, maybe add avatar of him
+2. make text bigger
+3. fix bug: the H1-4 names didn't change in a new round
+4. add click on evidence history for jumping around
+5. show discuss Topic on the top always
+6. add summary text on the last step
+7. add link icon when it has source on web searching
