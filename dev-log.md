@@ -1,66 +1,52 @@
 # May 12 Thu
-## 在 Claude Code 执行的时候，让一旁的 App 联动有哪些办法？
-
-### [x] 方法一：共享状态文件 + 文件监听（推荐，最简单）
-
-Skill 在每个贝叶斯更新步骤后，把当前概率状态写入一个 JSON 文件：
-
-```json
-// /tmp/bayes_state.json
-{
-  "step": 3,
-  "evidence": "观众参与制造记忆点",
-  "hypotheses": [
-    { "name": "H₁ Live Demo", "prior": 0.514, "posterior": 0.581 },
-    { "name": "H₂ Web App PPT", "prior": 0.121, "posterior": 0.055 }
-  ]
-}
-```
-
-可视化 App 用 `fs.watch` / `chokidar` 监听文件变化，通过 WebSocket 或 SSE 推送到前端，概率条实时动画更新。
-
-优点：零耦合，Skill 只需一行写文件；App 崩了不影响 Claude Code 继续运行。
-
-### 方法二：Claude Code Hooks（最原生，无需修改 Skill）
-
-在 `.claude/settings.json` 配置 `PostToolUse` hook，每次 Skill 写文件后自动触发脚本：
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [{
-      "matcher": "Write",
-      "hooks": [{ "type": "command", "command": "node scripts/push_to_app.js" }]
-    }]
-  }
-}
-```
-
-不需要改 Skill 代码，由 Claude Code 基础设施负责联动。
-
-### 方法三：MCP 工具（最灵活）
-
-可视化 App 暴露本地 MCP server，提供 `update_visualization` 工具。Skill 在每次更新后主动调用该工具传入结构化数据，Claude Code 通过 MCP 协议直接与 App 通信，无需文件中转。
+## 在 Claude Code 执行的时候，让一旁的 App 联动有哪些办法？共享状态文件 + 监听
+- 共享状态文件 + 监听
+  Skill 在每个阶段写入数据到 state.json，Web App 监听并更新展示
+- Claude Code Hooks
+  流程复杂，演示翻车时难恢复
+- MCP工具
+  需要 Web App 设计、暴露 MCP。复杂
 
 ### Demo 场景结论
 
 Hackathon 现场选**方法一**：30 分钟内可实现，容错性最好。App 挂了直接退回终端输出，不影响 Live Demo 主流程，契合"mistakes embraced as part of the art"的回退预案。
-## Sharing the status with file, and App listens to them
-### should we duplicated a dedicated demo skill then? yes
+## 我应该复制一份 Skill 专门用于展示嘛？**应该**
+- 直接改 Skill，会污染原版
+- 复制 Skill，原版干净
+- 结合 Hooks，链路长，同理上一个问题的第二个选项 
+## Claude Code Design Skill 和 Claude Design 哪个好？ 都用，先 Claude Design
+Options       | UI          | Token | Style
+Claude Design | Webpage     | More  | New
+Design Skill  | Claude Code | Less  | Keep Existing
+我需要全面的视觉设计，先从 Design 开始，再走 Skill。
 
-是的，Demo 场景下复制一份 demo-skill 是最合理的选择。
+## Thomas Bayes 时代的印刷品风格是什么？ Found
+Claude Code 的回复： 
+Caslon，Baskerville字体。页边距相对宽，章节标题剧中，字号稍大，不夸张。手工棉麻纸，黑色油墨印压，米黄色。章首花饰（headpiece），尾花（tailpiece），首字下沉（drop cap）。
+参考贝叶斯的论文：An Essay towards solving a Problem in the Doctrine of Chances.
 
-| 方案 | 稳定性 | 代码洁净度 |
-|------|--------|----------|
-| 改原版 Skill，直接写 JSON | 最稳 | 原版被污染 |
-| **复制 demo-skill，直接写 JSON** | **最稳** | **原版干净** |
-| Hook 拦截 + 脚本推送 | 链路长，有额外失败点 | 原版干净 |
+## 贝叶斯论文的参考图片？Found
+在 assets 目录下
 
-Hook 方案的问题：Skill → Write 工具 → Hook 脚本 → App → WebSocket → 前端，链路比方法一更长，Hook 脚本挂了行为不确定（可能报错、可能阻塞），Demo 现场排查成本高。
+## Claude Design 很长没有回复？缩小参考图
+输入的参考图片有一个 1MB，推测太大了。
 
-**结论**：复制出 demo-skill，改动只有一处——每次概率更新后加一行写 JSON 文件。逻辑极简单，原版 Skill 保持不动，Demo 稳定性最优。
+## 先开始页面设计还是系统设计？系统
+推测系统可以把风格确定下来，页面就简单了。
+给了 asserts 的参考图片和 reports 里的 print style 描述。
 
-### NEXT: 
+## 如何把中文 Noto Sans 字体混入？ 不用 Sans，改 Serif
+Claude Design 选用了 Noto Serif。也可以接受，毕竟要模拟油墨印刷风格，而且都是大字体，识别度应该够用。
+
+## Claude Design 会消耗大量 Claude Code 的用量么？未知
+从 ClauDepot 没发现太多变化。但是笑来老师有说过会。
+
+## 生成的 Design System 是个HTML，看不到效果？ 否
+可以。需要耐心等待预览的渲染。
+
+## 可以用现成的 index.html 基础上改造么？可以
+
+## NEXT: 
 1. Design the UI with a Thomas' time style, maybe add avatar of him
 2. make text bigger
 3. fix bug: the H1-4 names didn't change in a new round
@@ -68,3 +54,12 @@ Hook 方案的问题：Skill → Write 工具 → Hook 脚本 → App → WebSoc
 5. show discuss Topic on the top always
 6. add summary text on the last step
 7. add link icon when it has source on web searching
+
+## 取消中英混排的按钮等指示文字？ Done
+混排的占用空间，而且小字体的情况下，中文衬线字识别度不高。
+
+## 让假设内容变得更大？
+因为 Demo 的时候，整个屏幕只有一半来显示这个内容，我旦夕观众看不清。
+
+## 每一步的细节说明文字用 Noto Sans？
+
