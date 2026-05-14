@@ -559,7 +559,138 @@ body > *{ position: relative; z-index: 2; }
 .h-item-source:hover{ color: var(--ink); border-bottom-color: var(--ink); }
 
 
-/* 半屏 / 窄视口 */
+/* ── Report button ───────────────────────────────────── */
+.report-btn{
+  display: none;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--sans-en);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: .2em;
+  color: var(--ink-2);
+  border: 1px solid var(--ink);
+  background: rgba(255,250,230,.4);
+  padding: 6px 14px 5px;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  margin-right: 12px;
+}
+.report-btn.visible{ display: flex; }
+.report-btn:hover{ background: rgba(165,48,31,.06); color: var(--ink); }
+
+/* ── Report modal ────────────────────────────────────── */
+.report-overlay{
+  display: none;
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(26,20,12,.45);
+  backdrop-filter: blur(2px);
+}
+.report-overlay.open{ display: block; }
+.report-panel{
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: min(680px, 92vw);
+  background: var(--paper);
+  border-left: 2px solid var(--ink);
+  overflow-y: auto;
+  padding: 36px 44px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  background-image:
+    radial-gradient(900px 500px at 100% 0%, rgba(255,250,230,.8), transparent 60%);
+  box-shadow: -6px 0 32px rgba(26,20,12,.18);
+}
+.report-close{
+  align-self: flex-end;
+  font-family: var(--sans-en);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border: 1px solid var(--ink-3);
+  background: none;
+  padding: 5px 12px 4px;
+  cursor: pointer;
+  box-shadow: 1px 1px 0 var(--ink-3);
+}
+.report-close:hover{ color: var(--ink); border-color: var(--ink); box-shadow: 1px 1px 0 var(--ink); }
+.report-title{
+  font-family: var(--serif-cn);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: .2em;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 14px;
+}
+.report-title .en{
+  display: block;
+  font-family: var(--sans-en);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+.report-section{ display: flex; flex-direction: column; gap: 8px; }
+.report-section-label{
+  font-family: var(--sans-en);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-left: 2px solid var(--vermilion);
+  padding-left: 10px;
+}
+.report-section-body{
+  font-family: var(--sans-cn);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink);
+  letter-spacing: .04em;
+}
+.report-verdict{
+  font-family: var(--serif-cn);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.65;
+  color: var(--ink);
+  letter-spacing: .06em;
+  border: 1px solid var(--ink);
+  padding: 16px 20px;
+  background: rgba(165,48,31,.04);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.report-posterior-table{
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans-en);
+  font-size: 12px;
+}
+.report-posterior-table th{
+  text-align: left;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--ink);
+  padding: 4px 8px 6px;
+}
+.report-posterior-table td{
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink);
+  font-feature-settings: "tnum" 1;
+}
+.report-posterior-table td:first-child{ font-family: var(--sans-cn); letter-spacing: .04em; }
+
+/* ── 半屏 / 窄视口 */
 @media (max-width: 1100px){
   body{ padding: 24px 32px 18px; gap: 16px; }
   .h-row{ grid-template-columns: 260px 1fr 130px; gap: 18px; }
@@ -582,9 +713,25 @@ body > *{ position: relative; z-index: 2; }
       <span class="smcaps">Sess. №14</span>
     </span>
   </div>
-  <div class="live-pill off" id="live-pill">
-    <div class="live-dot" id="dot"></div>
-    <span id="live-label">Connecting</span>
+  <div style="display:flex;align-items:center;">
+    <button class="report-btn" id="report-btn" onclick="openReport()">⊞ Report</button>
+    <div class="live-pill off" id="live-pill">
+      <div class="live-dot" id="dot"></div>
+      <span id="live-label">Connecting</span>
+    </div>
+  </div>
+</div>
+
+<div class="report-overlay" id="report-overlay" onclick="handleOverlayClick(event)">
+  <div class="report-panel" id="report-panel">
+    <button class="report-close" onclick="closeReport()">✕ Close</button>
+    <div class="report-title">
+      分析結論
+      <span class="en">Final Report</span>
+    </div>
+    <table class="report-posterior-table" id="report-table"></table>
+    <div class="report-verdict" id="report-verdict"></div>
+    <div class="report-section" id="report-sections"></div>
   </div>
 </div>
 
@@ -751,9 +898,57 @@ function renderHistory(state){
   });
 }
 
+function renderConclusion(state){
+  const btn = document.getElementById('report-btn');
+  if (!state.conclusion) { btn.classList.remove('visible'); return; }
+  btn.classList.add('visible');
+
+  const c = state.conclusion;
+  const last = state.steps[state.steps.length - 1];
+
+  // posterior table
+  const table = document.getElementById('report-table');
+  const first = state.steps[0];
+  table.innerHTML = `
+    <tr>
+      <th>假說</th><th>先驗</th><th>後驗</th><th>變化</th>
+    </tr>
+    ${state.hypotheses.map((name, i) => {
+      const prior = (first.values[i].posterior * 100).toFixed(0);
+      const post  = (last.values[i].posterior  * 100).toFixed(1);
+      const arrow = last.values[i].posterior > first.values[i].posterior ? '↑' : '↓';
+      return `<tr><td>${name}</td><td>${prior}%</td><td>${post}%</td><td>${arrow}</td></tr>`;
+    }).join('')}
+  `;
+
+  document.getElementById('report-verdict').textContent = c.verdict || '';
+
+  const sections = document.getElementById('report-sections');
+  const defs = [
+    { label: 'Core Conclusion · 核心結論', key: 'core' },
+    { label: 'Residual Uncertainty · 殘餘不確定性', key: 'uncertainty' },
+    { label: 'Excluded · 已排除', key: 'excluded' },
+    { label: 'Action · 行動含義', key: 'action' },
+    { label: 'Bias Note · 偏誤說明', key: 'bias' },
+  ];
+  sections.innerHTML = defs.filter(d => c[d.key]).map(d => `
+    <div class="report-section">
+      <div class="report-section-label">${d.label}</div>
+      <div class="report-section-body">${c[d.key]}</div>
+    </div>
+  `).join('');
+}
+
 function render(state){
   renderBars(state);
   renderHistory(state);
+  renderConclusion(state);
+}
+
+function openReport(){ document.getElementById('report-overlay').classList.add('open'); }
+function closeReport(){ document.getElementById('report-overlay').classList.remove('open'); }
+function handleOverlayClick(e){
+  if (e.target === document.getElementById('report-overlay')) closeReport();
 }
 
 /* ── 连线 ─────────────────────────────────────────── */
