@@ -92,6 +92,5 @@ Claude Design 可以给出来class的名字方面后面调整
 4. add click on evidence history for jumping around
 5. show discuss Topic on the top always
 6. add summary text on the last step
-7. add link icon when it has source on web searching
 
 
