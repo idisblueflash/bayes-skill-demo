@@ -458,7 +458,7 @@ body > *{ position: relative; z-index: 2; }
 }
 .h-item{
   display:grid;
-  grid-template-columns: 100px 1fr 240px;
+  grid-template-columns: 100px 1fr auto 240px;
   align-items: center;
   gap: 18px;
   padding: 7px 12px;
@@ -530,6 +530,34 @@ body > *{ position: relative; z-index: 2; }
   letter-spacing: .08em;
 }
 
+.source-link{
+  display: none;
+  font-family: var(--sans-en);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule-soft);
+  margin-top: 6px;
+}
+.source-link:hover{ color: var(--ink); border-bottom-color: var(--ink); }
+.h-item-source{
+  font-family: var(--sans-en);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule-soft);
+  white-space: nowrap;
+  visibility: hidden;
+}
+.h-item-source.has-url{ visibility: visible; }
+.h-item-source:hover{ color: var(--ink); border-bottom-color: var(--ink); }
+
 
 /* 半屏 / 窄视口 */
 @media (max-width: 1100px){
@@ -568,6 +596,7 @@ body > *{ position: relative; z-index: 2; }
   <div class="evidence-body">
     <div class="evidence-eyebrow" id="ev-eyebrow">CURRENT EVIDENCE</div>
     <div class="step-detail-text evidence-text" id="ev-text">等待數據…</div>
+    <a class="source-link" id="ev-source" target="_blank" rel="noopener">Source ↗</a>
   </div>
   <div class="evidence-meta" id="ev-meta">
     <b>STEP</b>
@@ -629,6 +658,13 @@ function renderBars(state){
     tagNo.textContent = 'EV. Nº ' + last.step;
   }
   document.getElementById('ev-text').textContent = last.evidence || '初始先驗分布';
+  const evSource = document.getElementById('ev-source');
+  if (last.url) {
+    evSource.href = last.url;
+    evSource.style.display = 'inline';
+  } else {
+    evSource.style.display = 'none';
+  }
   document.getElementById('ev-meta-step').textContent = last.step === 0 ? '0' : last.step;
   document.getElementById('ev-meta-total').textContent = state.total ?? state.steps.length;
 
@@ -703,11 +739,12 @@ function renderHistory(state){
     const stepLabel = step.step === 0
       ? `<span style="font-family:var(--sans-en); font-weight:500; letter-spacing:.18em;">PRIOR</span>`
       : `<span class="num">${step.step}</span><span style="font-family:var(--sans-en); font-weight:500; letter-spacing:.18em;">STEP</span>`;
-    const evidence = step.step === 0 ? '初始先驗分布' : step.evidence;
+    const evidenceText = step.step === 0 ? '初始先驗分布' : step.evidence;
 
     item.innerHTML = `
       <div class="h-item-step">${stepLabel}</div>
-      <div class="step-detail-text h-item-evidence">${evidence}</div>
+      <div class="step-detail-text h-item-evidence">${evidenceText}</div>
+      <a class="h-item-source${step.url ? ' has-url' : ''}" ${step.url ? `href="${step.url}"` : ''} target="_blank" rel="noopener">Source ↗</a>
       <div class="mini-bars">${miniBars}</div>
     `;
     el.appendChild(item);

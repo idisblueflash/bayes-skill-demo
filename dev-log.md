@@ -76,9 +76,17 @@ Claude Design 可以给出来class的名字方面后面调整
 ## 有的文字加入 Noto Sans 之后，会破坏整体视觉嘛？不会
 检查过一次，可以的。有小地方需要重构。
 
+## fix bug: 四个假设名字无法显示？ Done
+
+## 如果有网络来源要显示在 App 上，可以点击？Done
+保存到了 JSON，添加了样式，更新了 HTML
+
 # NEXT:
 
 ## 永远把主题问题显示在页面顶端?
+
+## 加入尾页结论的部分？
+需要展示一大段的总结建议。
 
 3. fix bug: the H1-4 names didn't change in a new round
 4. add click on evidence history for jumping around
@@ -87,5 +95,3 @@ Claude Design 可以给出来class的名字方面后面调整
 7. add link icon when it has source on web searching
 
 
-## 加入尾页结论的部分？
-需要展示一大段的总结建议。
