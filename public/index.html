@@ -658,6 +658,8 @@ function renderBars(state){
           <span class="num">0.0</span><span class="pct">%</span>
         </div>
       `;
+      // show Chinese label in name; fall back to full name if no label
+      row.querySelector('.hypothesis-name').textContent = label || id;
       container.appendChild(row);
     });
     initialized = true;
