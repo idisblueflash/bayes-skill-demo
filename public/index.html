@@ -3,287 +3,668 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bayesian Hypothesis Tracker</title>
+<title>貝葉斯推斷 · Bayesian Hypothesis Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+DW+Pica&family=IM+Fell+English+SC&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:       #09101f;
-  --surface:  #101827;
-  --border:   #1b2537;
-  --text:     #dce8f5;
-  --muted:    #4a6070;
-  --accent:   #3b82f6;
-  --c0: #22d3ee;  /* H1 cyan   */
-  --c1: #f87171;  /* H2 red    */
-  --c2: #fbbf24;  /* H3 yellow */
-  --c3: #a78bfa;  /* H4 purple */
+:root{
+  --paper:        #ece1c3;
+  --paper-2:      #e4d5b0;
+  --ink:          #1a140c;
+  --ink-2:        #3b2f20;
+  --ink-3:        #6b5840;
+  --rule:         #8a7350;
+  --rule-soft:    #b89b6b;
+  --vermilion:    #a5301f;
+  --indigo:       #2c3a4a;
+  --gold:         #8a6a1f;
+
+  /* 四古色 — 替代原 c0..c3 */
+  --c0: var(--vermilion);   /* H1 · 朱 */
+  --c1: var(--indigo);      /* H2 · 靛 */
+  --c2: var(--gold);        /* H3 · 金 */
+  --c3: var(--ink);         /* H4 · 墨 */
+
+  --serif-en:        'IM Fell English', 'Cormorant Garamond', serif;
+  --serif-en-italic: 'IM Fell English', 'Cormorant Garamond', serif;
+  --serif-en-display:'IM Fell DW Pica', 'IM Fell English', serif;
+  --serif-en-sc:     'IM Fell English SC', 'IM Fell English', serif;
+  --sans-en:         'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --serif-cn:        'Noto Serif SC', 'Source Han Serif SC', 'STSong', serif;
+  --sans-cn:         'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+*{ box-sizing: border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif-cn);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 2rem 3.5rem 1.5rem;
-  gap: 1.5rem;
+  padding: 28px 44px 20px;
+  gap: 20px;
+  position: relative;
+  background-image:
+    radial-gradient(1200px 600px at 20% -10%, rgba(255,250,230,.7), transparent 60%),
+    radial-gradient(1200px 800px at 100% 110%, rgba(120,80,30,.20), transparent 60%),
+    radial-gradient(2px 2px at 30% 40%, rgba(60,40,20,.06), transparent 60%),
+    radial-gradient(1px 1px at 70% 80%, rgba(60,40,20,.06), transparent 60%);
+}
+/* 纸纹 + 边缘晕染 */
+body::before, body::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1;
+}
+body::before{
+  background:
+    repeating-linear-gradient(to bottom,
+      transparent 0 22px, rgba(60,40,20,.022) 22px 23px),
+    repeating-linear-gradient(to right,
+      transparent 0 110px, rgba(60,40,20,.025) 110px 111px);
+  mix-blend-mode: multiply;
+}
+body::after{
+  background:
+    radial-gradient(ellipse at 50% 0%, transparent 70%, rgba(80,50,20,.18) 100%),
+    radial-gradient(ellipse at 50% 100%, transparent 70%, rgba(80,50,20,.18) 100%),
+    radial-gradient(ellipse at 0% 50%, transparent 70%, rgba(80,50,20,.16) 100%),
+    radial-gradient(ellipse at 100% 50%, transparent 70%, rgba(80,50,20,.16) 100%);
+  mix-blend-mode: multiply;
+}
+body > *{ position: relative; z-index: 2; }
+
+/* ── Header ─────────────────────────────────────────── */
+.header{
+  display:flex; align-items:flex-end; justify-content:space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink);
+  position: relative;
+}
+.header::after{
+  content:""; position:absolute; left:0; right:0; bottom:-4px;
+  height:1px; background: var(--ink); opacity:.5;
+}
+.app-title{
+  display:flex; flex-direction:column; gap: 4px;
+}
+.app-title .cn{
+  font-family: var(--serif-cn);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: .35em;
+  line-height: 1;
+  margin-left: .35em;
+}
+.app-title .en{
+  font-family: var(--sans-en);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  font-style: normal;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.app-title .en .smcaps{
+  font-family: var(--sans-en);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: .2em;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-left: 12px;
+  text-transform: uppercase;
+  vertical-align: 1px;
 }
 
-/* ── Header ── */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.app-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+.live-pill{
+  display:flex; align-items:center; gap: 10px;
+  font-family: var(--sans-en);
+  font-weight: 500;
   text-transform: uppercase;
-  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: .2em;
+  color: var(--ink-2);
+  border: 1px solid var(--ink);
+  background: rgba(255,250,230,.4);
+  padding: 6px 14px 5px;
+  box-shadow: 2px 2px 0 var(--ink);
 }
-.live-pill {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 0.3rem 0.85rem;
+.live-pill.off{
+  border-color: var(--ink-3);
+  color: var(--ink-3);
+  box-shadow: 2px 2px 0 var(--ink-3);
 }
-.live-dot {
-  width: 7px;
-  height: 7px;
+.live-dot{
+  width: 9px; height: 9px;
+  background: var(--vermilion);
   border-radius: 50%;
-  background: #22c55e;
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--vermilion);
   animation: blink 2s infinite;
 }
-.live-dot.off { background: #ef4444; animation: none; }
-@keyframes blink { 0%,100% { opacity:1 } 50% { opacity:.25 } }
-
-/* ── Evidence card ── */
-.evidence-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1.1rem 1.6rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  min-height: 60px;
+.live-pill.off .live-dot{
+  background: var(--ink-3);
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--ink-3);
+  animation: none;
 }
-.step-tag {
-  flex-shrink: 0;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.72rem;
+@keyframes blink{ 0%,100%{ opacity:1 } 50%{ opacity:.25 } }
+
+/* ── Evidence card ───────────────────────────────────── */
+.evidence-card{
+  display:grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 22px;
+  align-items: center;
+  padding: 14px 22px;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  background:
+    linear-gradient(to bottom, rgba(255,250,230,.5), transparent 60%);
+}
+.evidence-card::before, .evidence-card::after{
+  /* 双线效果（顶部双线，底部已有单线） */
+}
+.step-tag{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  width: 64px; height: 64px;
+  border: 2px solid var(--vermilion);
+  color: var(--vermilion);
+  font-family: var(--serif-cn);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  letter-spacing: .25em;
+  background: rgba(165,48,31,.05);
+  box-shadow: 1px 1px 0 var(--vermilion);
+  transform: rotate(-3deg);
+  padding-top: 3px;
+}
+.step-tag .glyph{
+  font-family: var(--serif-en-display);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: .02em;
+  margin-bottom: 2px;
+  color: var(--vermilion);
+}
+.step-tag .nrm{
+  font-family: var(--sans-en);
+  font-weight: 500;
   text-transform: uppercase;
-  padding: 0.3rem 0.9rem;
-  border-radius: 20px;
-}
-.evidence-text {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-/* ── Bars ── */
-.hypotheses {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1.1rem;
-}
-
-.h-row {
-  display: grid;
-  grid-template-columns: 260px 1fr 92px;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.h-label {
-  text-align: right;
-  line-height: 1.35;
-}
-.h-label-id {
-  font-size: 1rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
-.h-label-name {
-  font-size: 0.85rem;
-  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--vermilion);
   margin-top: 1px;
 }
+.step-tag.placeholder{
+  border-color: var(--ink-3);
+  color: var(--ink-3);
+  box-shadow: 1px 1px 0 var(--ink-3);
+  background: rgba(60,40,20,.04);
+}
+.step-tag.placeholder .nrm{ color: var(--ink-3); }
 
-.bar-track {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  height: 52px;
-  overflow: hidden;
-  position: relative;
+.evidence-body{
+  display:flex; flex-direction:column; gap: 4px;
 }
-.bar-fill {
-  height: 100%;
-  border-radius: 7px;
-  width: 0%;
-  transition: width 0.85s cubic-bezier(.4,0,.2,1);
-  position: relative;
-}
-/* shimmer highlight on right edge */
-.bar-fill::after {
-  content:'';
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 40px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12));
-  border-radius: 0 7px 7px 0;
-}
-.bar-fill.flash {
-  animation: flash 0.55s ease-out;
-}
-@keyframes flash {
-  0%   { filter: brightness(2.5); }
-  100% { filter: brightness(1); }
-}
-
-.bar-pct {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-
-/* ── History ── */
-.history-section {
-  border-top: 1px solid var(--border);
-  padding-top: 1.1rem;
-}
-.section-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
+.evidence-eyebrow{
+  font-family: var(--sans-en);
+  font-weight: 500;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.75rem;
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: var(--ink-3);
 }
-.history-list {
-  display: flex;
+/* ── 证据详文 · Step detail text ───────────────────
+   顶部当前证据与总账每行的文本均用此类。
+   改这一块即可同时影响顶部与总账中的中文证据文。
+*/
+.step-detail-text{
+  font-family: var(--sans-cn);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: .04em;
+}
+
+.evidence-text{
+  font-family: var(--sans-cn);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.45;
+  letter-spacing: .04em;
+  color: var(--ink);
+  max-width: 64ch;
+}
+
+.evidence-meta{
+  font-family: var(--sans-en);
+  font-size: 12.5px;
+  color: var(--ink-3);
+  text-align: right;
+  border-left: 1px solid var(--rule);
+  padding-left: 18px;
+  line-height: 1.55;
+  white-space: nowrap;
+}
+.evidence-meta b{
+  display:block;
+  font-family: var(--sans-en);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: .2em;
+  color: var(--ink-2);
+  margin-bottom: 2px;
+}
+.evidence-meta .v{
+  font-family: var(--sans-en);
+  font-feature-settings: "tnum" 1;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 18px;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+/* ── Hypotheses ──────────────────────────────────────── */
+.hypotheses{
+  flex: 1;
+  display:flex;
   flex-direction: column;
-  gap: 0.4rem;
+  justify-content: center;
+  gap: 16px;
+  padding: 4px 0;
 }
-.h-item {
-  display: grid;
-  grid-template-columns: 80px 1fr 200px;
+.hypotheses{ gap: 22px; }
+.h-row{
+  display:grid;
+  grid-template-columns: 320px 1fr 150px;
   align-items: center;
-  gap: 1rem;
-  padding: 0.6rem 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.82rem;
-  color: var(--muted);
-  transition: border-color 0.3s;
+  gap: 24px;
 }
-.h-item.current {
-  border-color: var(--accent);
-  color: var(--text);
+.h-label{
+  display:flex; align-items:center; gap: 18px;
+  justify-content: flex-end;
+  text-align: right;
 }
-.h-item-step { font-weight: 600; font-size: 0.75rem; }
-.h-item-evidence { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mini-bars { display: flex; gap: 3px; height: 14px; }
-.mini-bar {
+/* ── 假设序号 · Hypothesis roman ──────────────────
+   改这一块即可同时影响四个假设的序号。
+*/
+.hypothesis-roman{
+  font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--ink);
+  min-width: 56px;
+  text-align: center;
+  border-right: 1px solid var(--rule);
+  padding-right: 22px;
+  letter-spacing: 0;
+}
+
+.h-label .roman{
+  font-family: var(--serif-en-display);
+  font-size: 56px;
+  line-height: 1;
+  color: var(--ink);
+  min-width: 56px;
+  text-align: center;
+  border-right: 1px solid var(--rule);
+  padding-right: 22px;
+}
+.h-label .names{
+  display:flex; flex-direction:column; gap: 4px;
+  align-items: flex-end;
+}
+/* ── 假设名 · Hypothesis label ──────────────────────
+   改这一块即可同时影响四个假设的样式。
+   如需重重写某一个，在后面加 .hypothesis-name.is-0 / is-1 … 覆盖即可。
+*/
+.hypothesis-name{
+  font-family: var(--sans-cn);
+  font-weight: 600;
+  font-size: 30px;
+  letter-spacing: .14em;
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+.h-label-id{ /* 留作后兼容 · 新代码请用 .hypothesis-name */
+  font-size: 30px;
+  letter-spacing: .14em;
+  color: var(--ink);
+  line-height: 1.15;
+}
+.h-label-name{ display: none; }
+
+/* 概率条：版画刻线 */
+.bar-track{
+  height: 64px;
+  border: 1px solid var(--ink);
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(60,40,20,.10) 0 1px, transparent 1px 7px);
+  position: relative;
+  overflow: hidden;
+}
+/* 标尺：0/25/50/75/100 */
+.bar-track::before{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(to right,
+      transparent 0 calc(25% - 1px),  var(--rule-soft) calc(25% - 1px) 25%, transparent 25%,
+      transparent 0 calc(50% - 1px),  var(--ink-3)    calc(50% - 1px) 50%, transparent 50%,
+      transparent 0 calc(75% - 1px),  var(--rule-soft) calc(75% - 1px) 75%, transparent 75%);
+  opacity:.7;
+  pointer-events: none;
+}
+.bar-fill{
+  position:absolute; top:0; bottom:0; left:0;
+  width: 0%;
+  background-color: rgba(0,0,0,.02);
+  border-right: 1.5px solid var(--col, var(--ink));
+  background-image:
+    repeating-linear-gradient(45deg,
+      var(--col, var(--ink)) 0 1.5px, transparent 1.5px 5px);
+  transition: width 0.85s cubic-bezier(.4,0,.2,1);
+}
+.bar-fill::after{
+  /* 顶部小三角 — 像旧地图标记 */
+  content:""; position:absolute; top:-1px; right:-7px;
+  width:0; height:0;
+  border-left: 6px solid var(--col, var(--ink));
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  transform: rotate(90deg) translateX(-50%);
+}
+.bar-fill.flash{ animation: stamp .55s ease-out; }
+@keyframes stamp{
+  0%   { filter: contrast(1.8) saturate(1.2); transform: translateY(-1px); }
+  100% { filter: none; transform: none; }
+}
+
+/* 先验虚线刻 */
+.prior-mark{
+  position:absolute; top:-4px; bottom:-4px; left:0;
+  width: 0;
+  border-left: 1px dashed var(--ink-3);
+  pointer-events: none;
+}
+.prior-mark::after{
+  content: "PRIOR";
+  position:absolute; left: 4px; top: -2px;
+  font-family: var(--sans-en);
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: var(--ink-3);
+  background: var(--paper);
+  padding: 0 3px;
+}
+
+.bar-pct{
+  font-family: var(--sans-en);
+  font-feature-settings: "tnum" 1;
+  font-weight: 500;
+  font-size: 46px;
+  letter-spacing: -0.01em;
+  color: var(--col, var(--ink));
+  text-align: right;
+  line-height: 1;
+}
+.bar-pct .pct{
+  font-family: var(--sans-en);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink-3);
+  letter-spacing: .12em;
+  margin-left: 3px;
+}
+
+/* ── History (ledger) ─────────────────────────────────── */
+.history-section{
+  border-top: 1px solid var(--ink);
+  padding-top: 12px;
+}
+.section-label{
+  display:flex; align-items:baseline; justify-content:space-between;
+  margin-bottom: 8px;
+}
+.section-label .l{
+  font-family: var(--sans-en);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: .22em;
+  color: var(--ink-3);
+}
+
+.section-label .r{
+  font-family: var(--sans-en);
+  font-style: normal;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.history-list{
+  display: grid;
+  gap: 0;
+  font-family: var(--serif-cn);
+}
+.h-item{
+  display:grid;
+  grid-template-columns: 100px 1fr 240px;
+  align-items: center;
+  gap: 18px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--rule-soft);
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.h-item:first-child{ border-top: 1px solid var(--rule-soft); }
+.h-item.current{
+  color: var(--ink);
+  background: rgba(165,48,31,.04);
+  border-bottom-color: var(--ink);
+  position: relative;
+}
+.h-item.current::before{
+  content:""; position:absolute; left:-4px; top:0; bottom:0;
+  width: 3px; background: var(--vermilion);
+}
+.h-item-step{
+  font-family: var(--sans-en);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: .18em;
+  color: var(--ink-2);
+}
+.h-item.current .h-item-step{ color: var(--vermilion); }
+.h-item-step .num{
+  font-family: var(--sans-en);
+  font-feature-settings: "tnum" 1;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 14px;
+  margin-right: 6px;
+  letter-spacing: 0;
+}
+.h-item-evidence{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--sans-cn);
+  font-size: 13.5px;
+  letter-spacing: .04em;
+}
+.h-item.current .h-item-evidence{ color: var(--ink); }
+
+.mini-bars{
+  display:flex; gap: 4px; height: 16px;
+  align-items: stretch;
+}
+.mini-bar{
   height: 100%;
-  border-radius: 2px;
-  min-width: 1px;
-  transition: width 0.5s ease;
+  min-width: 2px;
+  border: 1px solid var(--col, var(--ink));
+  background-image: repeating-linear-gradient(45deg,
+    var(--col, var(--ink)) 0 1px, transparent 1px 3px);
+  background-color: rgba(0,0,0,.02);
+  transition: width 0.6s ease;
+}
+
+/* footer 微缩 */
+.footer-note{
+  font-family: var(--sans-en);
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--ink-3);
+  text-align: right;
+  padding-top: 2px;
+  letter-spacing: .08em;
+}
+
+
+/* 半屏 / 窄视口 */
+@media (max-width: 1100px){
+  body{ padding: 24px 32px 18px; gap: 16px; }
+  .h-row{ grid-template-columns: 260px 1fr 130px; gap: 18px; }
+  .h-label .roman{ font-size: 44px; min-width: 44px; padding-right: 16px; }
+  .h-label-id{ font-size: 24px; }
+  .bar-track{ height: 56px; }
+  .bar-pct{ font-size: 38px; }
+  .evidence-text{ font-size: 19px; }
+  .app-title .cn{ font-size: 20px; }
+  .app-title .en{ font-size: 17px; }
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="app-title">Bayesian Hypothesis Tracker</div>
-  <div class="live-pill">
-    <div class="live-dot off" id="dot"></div>
+  <div class="app-title">
+    <span class="cn">貝&thinsp;葉&thinsp;斯&thinsp;推&thinsp;斷</span>
+    <span class="en">Bayesian Hypothesis Tracker
+      <span class="smcaps">Sess. №14</span>
+    </span>
+  </div>
+  <div class="live-pill off" id="live-pill">
+    <div class="live-dot" id="dot"></div>
     <span id="live-label">Connecting</span>
   </div>
 </div>
 
 <div class="evidence-card">
-  <span class="step-tag" id="step-tag">—</span>
-  <span class="evidence-text" id="ev-text">等待數據…</span>
+  <div class="step-tag placeholder" id="step-tag">
+    <span class="glyph">PR</span>
+    <span class="nrm" id="step-tag-no">PRIOR</span>
+  </div>
+  <div class="evidence-body">
+    <div class="evidence-eyebrow" id="ev-eyebrow">CURRENT EVIDENCE</div>
+    <div class="step-detail-text evidence-text" id="ev-text">等待數據…</div>
+  </div>
+  <div class="evidence-meta" id="ev-meta">
+    <b>STEP</b>
+    <span class="v" id="ev-meta-step">—</span><br>
+    <b>OF</b>
+    <span class="v" id="ev-meta-total">—</span>
+  </div>
 </div>
 
 <div class="hypotheses" id="hypotheses"></div>
 
 <div class="history-section">
-  <div class="section-label">Evidence History</div>
+  <div class="section-label">
+    <span class="l">EVIDENCE LEDGER</span>
+    <span class="r">read in reverse order</span>
+  </div>
   <div class="history-list" id="history"></div>
+  <div class="footer-note">
+    <span>Typis Mandato Auctoris &middot; M D C C C C M X X V I.</span>
+  </div>
 </div>
 
 <script>
-const COLORS = ['var(--c0)','var(--c1)','var(--c2)','var(--c3)'];
-const GRADS  = [
-  'linear-gradient(90deg,#0e7fa8,#22d3ee)',
-  'linear-gradient(90deg,#b91c1c,#f87171)',
-  'linear-gradient(90deg,#b45309,#fbbf24)',
-  'linear-gradient(90deg,#5b21b6,#a78bfa)',
+/* —— 颜色：四古色 —————————————————————————————————— */
+const COLORS = [
+  'var(--c0)', /* 朱 */
+  'var(--c1)', /* 靛 */
+  'var(--c2)', /* 金 */
+  'var(--c3)'  /* 墨 */
 ];
+const ROMANS = ['Ⅰ','Ⅱ','Ⅲ','Ⅳ'];
 
 let initialized = false;
+let priors = [];   // 记住第 0 步 (先验) 用于虚线刻
 
-function fmt(v) { return (v * 100).toFixed(1) + '%'; }
-
-function splitLabel(name) {
-  const m = name.match(/^([^\s]+)\s+(.+)$/);
-  return m ? [m[1], m[2]] : [name, ''];
+function fmt(v){ return (v * 100).toFixed(1) + '%'; }
+function fmtPlain(v){ return (v * 100).toFixed(1); }
+function splitLabel(name){
+  // 剥掉前缀罗马数字 / 编号，因 .roman 列已显示
+  const stripped = name.replace(/^[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩIVXivx]+[\.、\s]+/, '');
+  const m = stripped.match(/^([^\s]+)\s+(.+)$/);
+  return m ? [m[1], m[2]] : [stripped, ''];
 }
 
-function renderBars(state) {
+function renderBars(state){
   const last = state.steps[state.steps.length - 1];
-  document.getElementById('step-tag').textContent = `Step ${last.step}`;
-  document.getElementById('ev-text').textContent = last.evidence;
+  const first = state.steps[0];
 
+  // 顶部证据卡
+  const tag = document.getElementById('step-tag');
+  const tagNo = document.getElementById('step-tag-no');
+  if (last.step === 0){
+    tag.classList.add('placeholder');
+    tag.querySelector('.glyph').textContent = 'PR';
+    tagNo.textContent = 'PRIOR';
+  } else {
+    tag.classList.remove('placeholder');
+    tag.querySelector('.glyph').textContent = ROMANS[last.step-1] || last.step;
+    tagNo.textContent = 'EV. Nº ' + last.step;
+  }
+  document.getElementById('ev-text').textContent = last.evidence || '初始先驗分布';
+  document.getElementById('ev-meta-step').textContent = last.step === 0 ? '0' : last.step;
+  document.getElementById('ev-meta-total').textContent = state.total ?? state.steps.length;
+
+  // 假设条
   const container = document.getElementById('hypotheses');
-
-  if (!initialized) {
+  if (!initialized){
     container.innerHTML = '';
+    priors = first.values.map(v => v.posterior);
     state.hypotheses.forEach((name, i) => {
       const [id, label] = splitLabel(name);
       const row = document.createElement('div');
       row.className = 'h-row';
+      row.style.setProperty('--col', COLORS[i]);
       row.innerHTML = `
         <div class="h-label">
-          <div class="h-label-id">${id}</div>
-          <div class="h-label-name">${label}</div>
+          <div class="names">
+            <div class="hypothesis-name h-label-id is-${i}">${id}</div>
+            <div class="h-label-name">${label}</div>
+          </div>
+          <div class="hypothesis-roman roman is-${i}">${ROMANS[i] || (i+1)}</div>
         </div>
         <div class="bar-track">
-          <div class="bar-fill" id="bf${i}" style="background:${GRADS[i]}"></div>
+          <div class="prior-mark" id="pm${i}" style="left:${priors[i]*100}%"></div>
+          <div class="bar-fill" id="bf${i}" style="--col:${COLORS[i]}"></div>
         </div>
-        <div class="bar-pct" id="bp${i}" style="color:${COLORS[i]}">0%</div>
+        <div class="bar-pct" id="bp${i}" style="--col:${COLORS[i]}">
+          <span class="num">0.0</span><span class="pct">%</span>
+        </div>
       `;
       container.appendChild(row);
     });
     initialized = true;
-    // Trigger initial animation
     requestAnimationFrame(() => {
       last.values.forEach((v, i) => {
         document.getElementById(`bf${i}`).style.width = `${v.posterior * 100}%`;
-        document.getElementById(`bp${i}`).textContent = fmt(v.posterior);
+        document.getElementById(`bp${i}`).querySelector('.num').textContent = fmtPlain(v.posterior);
       });
     });
   } else {
@@ -291,18 +672,18 @@ function renderBars(state) {
       const bar = document.getElementById(`bf${i}`);
       const pct = document.getElementById(`bp${i}`);
       const w = `${v.posterior * 100}%`;
-      if (bar.style.width !== w) {
+      if (bar.style.width !== w){
         bar.classList.remove('flash');
         void bar.offsetWidth;
         bar.classList.add('flash');
         bar.style.width = w;
-        pct.textContent = fmt(v.posterior);
+        pct.querySelector('.num').textContent = fmtPlain(v.posterior);
       }
     });
   }
 }
 
-function renderHistory(state) {
+function renderHistory(state){
   const el = document.getElementById('history');
   el.innerHTML = '';
   const lastStep = state.steps[state.steps.length - 1].step;
@@ -314,38 +695,99 @@ function renderHistory(state) {
 
     const miniBars = state.hypotheses.map((_, i) => {
       const w = (step.values[i].posterior * 100).toFixed(1);
-      return `<div class="mini-bar" style="width:${w}%;background:${COLORS[i]}"></div>`;
+      return `<div class="mini-bar" style="width:${Math.max(w,1.5)}%; --col:${COLORS[i]}"></div>`;
     }).join('');
 
+    const stepLabel = step.step === 0
+      ? `<span style="font-family:var(--sans-en); font-weight:500; letter-spacing:.18em;">PRIOR</span>`
+      : `<span class="num">${step.step}</span><span style="font-family:var(--sans-en); font-weight:500; letter-spacing:.18em;">STEP</span>`;
+    const evidence = step.step === 0 ? '初始先驗分布' : step.evidence;
+
     item.innerHTML = `
-      <div class="h-item-step">${step.step === 0 ? '先驗' : `Step ${step.step}`}</div>
-      <div class="h-item-evidence">${step.step === 0 ? '初始先驗分布' : step.evidence}</div>
+      <div class="h-item-step">${stepLabel}</div>
+      <div class="step-detail-text h-item-evidence">${evidence}</div>
       <div class="mini-bars">${miniBars}</div>
     `;
     el.appendChild(item);
   });
 }
 
-function render(state) {
+function render(state){
   renderBars(state);
   renderHistory(state);
 }
 
+/* ── 连线 ─────────────────────────────────────────── */
+const livePill = document.getElementById('live-pill');
+const liveLabel = document.getElementById('live-label');
+
+function setLive(on){
+  if (on){
+    livePill.classList.remove('off');
+    liveLabel.textContent = 'LIVE';
+  } else {
+    livePill.classList.add('off');
+    liveLabel.textContent = 'Reconnecting';
+  }
+}
+
+let demoStarted = false;
 const es = new EventSource('/events');
-
-es.onopen = () => {
-  document.getElementById('dot').classList.remove('off');
-  document.getElementById('live-label').textContent = 'Live';
-};
-
-es.onmessage = e => {
-  render(JSON.parse(e.data));
-};
-
+es.onopen = () => setLive(true);
+es.onmessage = e => { try{ render(JSON.parse(e.data)); }catch(err){} };
 es.onerror = () => {
-  document.getElementById('dot').classList.add('off');
-  document.getElementById('live-label').textContent = 'Reconnecting';
+  setLive(false);
+  if (!demoStarted){
+    demoStarted = true;
+    setTimeout(startDemo, 1200);
+  }
 };
+
+/* ── Demo 回退（无后端时演示用）────────────────────── */
+function startDemo(){
+  liveLabel.textContent = 'DEMO';
+  const hypotheses = [
+    'Ⅰ 硬幣偏正 biased to Heads',
+    'Ⅱ 硬幣偏反 biased to Tails',
+    'Ⅲ 公正硬幣 fair Coin',
+    'Ⅳ 翻立 edge'
+  ];
+  const seq = [
+    { step:0, evidence:'', values:[.32,.32,.34,.02] },
+    { step:1, evidence:'第一輪十擲：得六正四反。', values:[.46,.20,.32,.02] },
+    { step:2, evidence:'第二輪二十擲：得十四正六反。', values:[.62,.10,.26,.02] },
+    { step:3, evidence:'再以另一手復擲十次，得七正三反。', values:[.68,.08,.22,.02] },
+    { step:4, evidence:'易硬幣為新鑄者，五擲三正二反。', values:[.51,.15,.32,.02] },
+    { step:5, evidence:'眾目所見：拋擲手法似有偏倚之嫌。', values:[.72,.09,.17,.02] },
+    { step:6, evidence:'換以滾擲之法二十次，得十六正。', values:[.81,.05,.12,.02] },
+    { step:7, evidence:'已可宣告：硬幣偏向正面，殆無可疑。', values:[.88,.03,.07,.02] }
+  ];
+  let idx = 1;
+  // 先把先验铺到位
+  render({
+    hypotheses, total: seq.length - 1,
+    steps: [packStep(seq[0])]
+  });
+  const tick = () => {
+    if (idx >= seq.length) return;
+    const upto = seq.slice(0, idx + 1).map(packStep);
+    render({ hypotheses, total: seq.length - 1, steps: upto });
+    idx += 1;
+    setTimeout(tick, 2200);
+  };
+  setTimeout(tick, 900);
+
+  function packStep(s){
+    return {
+      step: s.step,
+      evidence: s.evidence,
+      values: s.values.map(p => ({ posterior: p }))
+    };
+  }
+}
 </script>
 </body>
 </html>
+
+<style id="__om-edit-overrides">
+</style>
