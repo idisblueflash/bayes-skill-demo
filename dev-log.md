@@ -81,16 +81,25 @@ Claude Design 可以给出来class的名字方面后面调整
 ## 如果有网络来源要显示在 App 上，可以点击？Done
 保存到了 JSON，添加了样式，更新了 HTML
 
+# May 15 Fri
+## 四个假设标题重新开始时仍然保留上次内容的bug？Done
+这个位置没有加入判断，所以重新开始也不会被刷新。现在加入了文字内容判断，如果不一样，会强制重新渲染。
+
+## 添加一个重新开始的手动按钮？不
+修复了上面的bug，这个按钮没有必要了。系统会自动刷新数据。增加也会让界面变得复杂。
+
+## 添加滚动鼠标滚轮的回看功能？是
+有助于Demo，但是需要屏蔽滚动页面，好在页面是全屏的，避开了这个逻辑。
+滚动太快，就一下子到了头，需要增加delay。
+
+## 加入尾页结论的部分？Done
+需要展示一大段的总结建议。
+
+
 # NEXT:
 
 ## 永远把主题问题显示在页面顶端?
 
-## 加入尾页结论的部分？
-需要展示一大段的总结建议。
-
-3. fix bug: the H1-4 names didn't change in a new round
-4. add click on evidence history for jumping around
 5. show discuss Topic on the top always
-6. add summary text on the last step
 
 

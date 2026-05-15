@@ -778,6 +778,10 @@ const ROMANS = ['Ⅰ','Ⅱ','Ⅲ','Ⅳ'];
 
 let initialized = false;
 let priors = [];   // 记住第 0 步 (先验) 用于虚线刻
+let lastHypothesesKey = '';
+let fullState = null;
+let viewStep = -1;    // -1 = live (always show latest)
+let isConnected = false;
 
 function fmt(v){ return (v * 100).toFixed(1) + '%'; }
 function fmtPlain(v){ return (v * 100).toFixed(1); }
@@ -789,6 +793,12 @@ function splitLabel(name){
 }
 
 function renderBars(state){
+  const hypothesesKey = state.hypotheses.join('|');
+  if (hypothesesKey !== lastHypothesesKey) {
+    initialized = false;
+    lastHypothesesKey = hypothesesKey;
+  }
+
   const last = state.steps[state.steps.length - 1];
   const first = state.steps[0];
 
@@ -940,9 +950,11 @@ function renderConclusion(state){
 }
 
 function render(state){
-  renderBars(state);
-  renderHistory(state);
-  renderConclusion(state);
+  fullState = state;
+  const vs = viewStep === -1 ? state : { ...state, steps: state.steps.slice(0, viewStep + 1) };
+  renderBars(vs);
+  renderHistory(vs);
+  renderConclusion(vs);
 }
 
 function openReport(){ document.getElementById('report-overlay').classList.add('open'); }
@@ -956,6 +968,7 @@ const livePill = document.getElementById('live-pill');
 const liveLabel = document.getElementById('live-label');
 
 function setLive(on){
+  isConnected = on;
   if (on){
     livePill.classList.remove('off');
     liveLabel.textContent = 'LIVE';
@@ -964,6 +977,36 @@ function setLive(on){
     liveLabel.textContent = 'Reconnecting';
   }
 }
+
+function updateScrubPill(){
+  if (viewStep === -1){
+    setLive(isConnected);
+  } else {
+    const maxIdx = fullState.steps.length - 1;
+    livePill.classList.remove('off');
+    liveLabel.textContent = `◀ STEP ${viewStep} / ${maxIdx} ▶`;
+  }
+}
+
+let lastScrollTime = 0;
+const SCROLL_COOLDOWN = 350; // ms — minimum interval between step changes
+
+window.addEventListener('wheel', e => {
+  if (!fullState || fullState.steps.length <= 1) return;
+  e.preventDefault();
+  const now = Date.now();
+  if (now - lastScrollTime < SCROLL_COOLDOWN) return;
+  lastScrollTime = now;
+  const maxIdx = fullState.steps.length - 1;
+  if (viewStep === -1) viewStep = maxIdx;
+  viewStep = e.deltaY < 0 ? Math.max(0, viewStep - 1) : Math.min(maxIdx, viewStep + 1);
+  if (viewStep === maxIdx) viewStep = -1;
+  const vs = viewStep === -1 ? fullState : { ...fullState, steps: fullState.steps.slice(0, viewStep + 1) };
+  renderBars(vs);
+  renderHistory(vs);
+  renderConclusion(vs);
+  updateScrubPill();
+}, { passive: false });
 
 let demoStarted = false;
 const es = new EventSource('/events');
