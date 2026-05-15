@@ -778,6 +778,7 @@ const ROMANS = ['Ⅰ','Ⅱ','Ⅲ','Ⅳ'];
 
 let initialized = false;
 let priors = [];   // 记住第 0 步 (先验) 用于虚线刻
+let lastHypothesesKey = '';
 
 function fmt(v){ return (v * 100).toFixed(1) + '%'; }
 function fmtPlain(v){ return (v * 100).toFixed(1); }
@@ -789,6 +790,12 @@ function splitLabel(name){
 }
 
 function renderBars(state){
+  const hypothesesKey = state.hypotheses.join('|');
+  if (hypothesesKey !== lastHypothesesKey) {
+    initialized = false;
+    lastHypothesesKey = hypothesesKey;
+  }
+
   const last = state.steps[state.steps.length - 1];
   const first = state.steps[0];
 
