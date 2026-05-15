@@ -100,6 +100,10 @@ Claude Design 可以给出来class的名字方面后面调整
 
 ## 永远把主题问题显示在页面顶端?
 
+## 更多的自定义的假设是否支持？
+
+## 我们是否应该设计脚本来单独计算后验来保证准确？
+
 5. show discuss Topic on the top always
 
 
