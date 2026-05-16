@@ -13,7 +13,7 @@ live_mode: false
 ```
 
 `live_mode: false`（預設）— 純對話模式，不寫入任何檔案，適合一般使用者。
-`live_mode: true` — 每次貝氏更新後將概率狀態寫入 `/tmp/bayes_state.json`，供視覺化 App 即時讀取。需搭配對應的 Web App 使用。
+`live_mode: true` — 每次貝氏更新後將概率狀態寫入 `bayes_state.json`，供視覺化 App 即時讀取。需搭配對應的 Web App 使用。
 
 ---
 
@@ -125,7 +125,7 @@ live_mode: false
 
 若 `live_mode: false`，跳過此步驟。
 
-若 `live_mode: true`，立即使用 Write 工具將完整歷史寫入 `/tmp/bayes_state.json`。每次寫入時，保留所有先前的 steps，並在陣列末尾追加本輪新 step。
+若 `live_mode: true`，立即使用 Write 工具將完整歷史寫入 `bayes_state.json`。每次寫入時，保留所有先前的 steps，並在陣列末尾追加本輪新 step。
 
 ```json
 {
