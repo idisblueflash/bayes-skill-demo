@@ -1,23 +1,23 @@
-# Changelog
+# 更新日誌
 
-All notable changes to `bayesian-hypothesis-live` will be documented here.
+記錄 `bayesian-hypothesis-live` 每次版本的重要變更。
 
 ## [0.3.0] - 2026-05-15
 
-### Changed
-- Bayesian math tables (likelihood estimates and update table) are no longer printed to the conversation
-- Per-evidence output is now a single plain-language signal summary, keeping sessions readable for non-Bayesian audiences
-- Full math is still computed internally and written to `bayes_state.json`
-- An optional `<details>` collapsible block is available for auditing during Q&A
+### 改進
+- 對話過程中不再顯示貝氏數學運算表格，閱讀體驗更清爽
+- 每條證據只輸出一句白話總結，非統計背景的使用者也能輕鬆跟上
+- 完整數學計算仍在背後進行，並寫入 `bayes_state.json` 供視覺化展示
+- 需要查看計算細節時，可展開隱藏區塊確認
 
 ## [0.2.0] - 2026-05-15
 
-### Added
-- Reader-friendly stage-summary table with a "reason" column (調查前 / 現在 / 原因 format)
-- Final posterior table updated to the same plain-language format — no Bayesian jargon exposed to end users
+### 新增
+- 每個階段新增易讀的總結表格，包含「調查前 / 現在 / 原因」三欄
+- 最終結論表格同步採用白話格式，不暴露貝氏術語給使用者
 
 ## [0.1.0] - 2026-05-12
 
-### Added
-- Initial release of the Live Demo variant of `bayesian-hypothesis`
-- Writes probability state to `/tmp/bayes_state.json` after each Bayesian update, enabling real-time visualization
+### 新增
+- 首次發布 Live Demo 版本
+- 每次貝氏更新後自動將概率狀態寫入 `/tmp/bayes_state.json`，供即時視覺化 App 讀取
