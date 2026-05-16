@@ -18,3 +18,12 @@
 Each skill lives under `.claude/skills/<skill-name>/` and contains:
 - `SKILL.md` — skill definition with `name`, `version`, `description` frontmatter
 - `CHANGELOG.md` — version history in Traditional Chinese
+
+## Releasing a Skill
+
+Run `npm run release` (or `bash scripts/release.sh`) from the project root.
+
+- GitHub release tag format: `skill-v{version}` (e.g. `skill-v0.3.0`)
+- Release notes are auto-generated: CHANGELOG section for that version + Chinese installation instruction
+- To test with a specific version without editing `SKILL.md`: `bash scripts/release.sh 0.1.0`
+- Delete test releases on GitHub before publishing the real one
