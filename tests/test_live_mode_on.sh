@@ -23,9 +23,11 @@ trap restore EXIT
 # Remove any existing state file
 rm -f "$STATE_FILE"
 
-# Run the skill non-interactively
+# Run the skill non-interactively (haiku + bare to minimise token cost)
 claude -p "$(cat tests/fixtures/minimal_bayes_scenario.txt)" \
   --allowedTools "Write,Read" \
+  --model claude-haiku-4-5-20251001 \
+  --bare \
   --output-format text \
   > /dev/null
 
