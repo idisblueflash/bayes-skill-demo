@@ -122,18 +122,28 @@ Claude Design 可以给出来class的名字方面后面调整
 ## 我们应该在 Claude Code 展示简洁的推理表格么？应该
 这给了一个推理过成的具体展示，如果不是 demo 的情况，更可读
 
-## 默认关闭 live 版本功能？
-- [x] 需要给用户分享这个 Skill ，所有需要默认关闭版本演示功能
-- [x] 需要一个e2e测试来验证它的成功。
+## 默认关闭 live 版本功能？ 应该 Done (v0.5.0)
+- [x] 在 SKILL.md 顶部加上 live_mode: false 开关
+- [x] live_mode 只有 Developer 自己在 Meetup 演示时才开，社区用户永远不需要碰
+- [x] 用 Python 写 E2E 测试，通过 env var 注入 live_mode 值，不修改 SKILL.md
+  - 测试 fixture 只提供数据，不包含逻辑指令，逻辑交给 Skill 处理
+  - 使用 claude-haiku 降低 token 成本
+  - 不使用 --bare 标志（会禁用 OAuth 登录）
+- [x] 更新 README，以社区用户视角为主，live mode 单独放在 Developer Only 章节
+- [x] 发布 skill-v0.5.0 到 GitHub Releases
 
 # NEXT:
+
+## 加入网络搜素环节
+
+## 加入保存成 MD 报告环节
+
+## 同时发布 Subagent ？
 
 ## 永远把主题问题显示在页面顶端?
 
 ## 更多的自定义的假设是否支持？
 
 ## 我们是否应该设计脚本来单独计算后验来保证准确？
-
-5. show discuss Topic on the top always
 
 
