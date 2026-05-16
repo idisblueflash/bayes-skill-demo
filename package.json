@@ -2,6 +2,7 @@
   "name": "bayes-live-viz",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "release": "bash scripts/release.sh"
   }
 }
