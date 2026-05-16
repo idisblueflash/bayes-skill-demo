@@ -1,5 +1,6 @@
 ---
 name: bayesian-hypothesis-live
+version: 1.0.0
 description: 貝氏假說驗證的 Demo 版本，每次貝氏更新後將概率狀態寫入 /tmp/bayes_state.json，供可視化 App 實時讀取。用法與 bayesian-hypothesis 完全一致，在 Hackathon Live Demo 場景下替換使用。
 ---
 

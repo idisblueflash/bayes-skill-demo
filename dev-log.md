@@ -95,6 +95,15 @@ Claude Design 可以给出来class的名字方面后面调整
 ## 加入尾页结论的部分？Done
 需要展示一大段的总结建议。
 
+# May 16 Sat.
+## 给 Skill 加上版本号
+- [ ] 在 frontmatter 加上版本号
+  - Claude Code 目前对 version 这个字段没有支持，不会自动更新版本。
+  - 加上版本只是方便分发 skill 的时候方便用户分辨。
+- [ ] 增加 CHNAGELOG.md
+- [ ] 把历史版本编入
+## 制作打包发布的脚本
+## 默认关闭 live 版本功能
 
 # NEXT:
 
