@@ -4,6 +4,6 @@
   "scripts": {
     "start": "node server.js",
     "release": "bash scripts/release.sh",
-    "test": "bash tests/run_all.sh"
+    "test": "python3 tests/run_all.py"
   }
 }
