@@ -1,7 +1,12 @@
-直接執行貝氏更新，完成後停止，不要詢問確認。
+直接執行步驟三，不需要推理。
 
-H₁（50%）功能不好
-H₂（30%）用戶不懂怎麼用
-H₃（20%）沒有真實需求
+若 live_mode: true，將以下資料寫入 bayes_state.json；若 live_mode: false，跳過，不寫入任何檔案。
 
-證據：8 位受訪者中 6 位說「不知道這個功能可以這樣用」。
+hypotheses: ["H₁ 功能不好", "H₂ 不懂怎麼用", "H₃ 沒有需求"]
+step: 1
+evidence: "測試證據"
+values: [
+  {"prior": 0.5, "posterior": 0.2},
+  {"prior": 0.3, "posterior": 0.6},
+  {"prior": 0.2, "posterior": 0.2}
+]
