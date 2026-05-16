@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node server.js",
-    "release": "bash scripts/release.sh"
+    "release": "bash scripts/release.sh",
+    "test": "bash tests/run_all.sh"
   }
 }
