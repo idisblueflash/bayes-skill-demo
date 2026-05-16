@@ -119,7 +119,12 @@ Claude Design 可以给出来class的名字方面后面调整
 - [x] zip 解开的路径 .claude/skills/... 对 Claude Code 友好，用户直接让 AI 装即可
 - [x] 正式发布 skill-v0.3.0 到 GitHub Releases
 
-## 默认关闭 live 版本功能
+## 我们应该在 Claude Code 展示简洁的推理表格么？应该
+这给了一个推理过成的具体展示，如果不是 demo 的情况，更可读
+
+## 默认关闭 live 版本功能？
+- [x] 需要给用户分享这个 Skill ，所有需要默认关闭版本演示功能
+- [x] 需要一个e2e测试来验证它的成功。
 
 # NEXT:
 

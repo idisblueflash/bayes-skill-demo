@@ -1,42 +1,81 @@
 # bayes-skill-demo
 
-Live Bayesian hypothesis visualization for Claude Code hackathon demos. The `bayesian-hypothesis-live` skill updates `bayes_state.json` after every Bayesian step; the web app watches that file and animates the probability bars in real time.
+A Claude Code skill for stepwise Bayesian hypothesis validation. Feed it competing hypotheses and evidence one by one; it updates the posterior probabilities after each step and shows a concise likelihood table.
 
-## Usage
+Optionally pairs with a live visualization web app for Hackathon / Meetup demos.
 
-**1. Start the visualization server**
+## Install the skill
 
-```bash
-node server.js
+Download the latest release zip from the [Releases page](../../releases), then tell your Claude Code:
+
+```
+幫我安裝這個 skill，zip 檔在這裡：~/Downloads/bayesian-hypothesis-live-v0.5.0.zip
 ```
 
-Open http://localhost:3000 in a browser (or project on a second screen).
+## Use the skill
 
-**2. Run the skill in Claude Code**
-
-In a new Claude Code session, use the `bayesian-hypothesis-live` skill:
+In any Claude Code session:
 
 ```
 /bayesian-hypothesis-live
 ```
 
-Follow the prompts to set up competing hypotheses and add evidence. After each Bayesian update the skill writes to `bayes_state.json` and the browser updates automatically.
+Follow the prompts to set up competing hypotheses, then add evidence one by one. After each update you'll see a likelihood table and updated posteriors.
 
-## How it works
+## Live Demo mode (developer only)
+
+By default the skill runs in pure conversation mode — no files written. To pair it with the real-time visualization web app for a demo:
+
+**1. Enable live mode**
+
+In `.claude/skills/bayesian-hypothesis-live/SKILL.md`, change:
 
 ```
-Claude Code skill  →  bayes_state.json  →  SSE  →  browser bars animate
+live_mode: false
+```
+to:
+```
+live_mode: true
 ```
 
-- `server.js` watches the project directory for changes to `bayes_state.json`
-- Connected browsers receive updates via Server-Sent Events
-- The page shows the current evidence, animated probability bars, and a history of all steps
+**2. Start the visualization server**
+
+```bash
+npm start
+```
+
+Open http://localhost:3000 (or project on a second screen). The browser updates automatically after each Bayesian step.
+
+**3. After the demo, turn live mode off**
+
+Change `live_mode` back to `false`.
+
+## Release a new version
+
+1. Bump `version` in `.claude/skills/bayesian-hypothesis-live/SKILL.md`
+2. Add an entry to `.claude/skills/bayesian-hypothesis-live/CHANGELOG.md`
+3. Commit, then run:
+
+```bash
+npm run release
+```
+
+## Run tests
+
+```bash
+npm test
+```
+
+Tests verify the `live_mode` switch: `false` must not write `bayes_state.json`, `true` must write valid JSON.
 
 ## Files
 
-| File | Purpose |
+| Path | Purpose |
 |------|---------|
-| `server.js` | Node.js server — file watcher + SSE endpoint + static file serving |
-| `public/index.html` | Frontend — probability bars, evidence card, history |
-| `bayes_state.json` | Shared state written by the skill, read by the server |
-| `.claude/skills/bayesian-hypothesis-live/` | Claude Code skill that drives the updates |
+| `.claude/skills/bayesian-hypothesis-live/SKILL.md` | Skill definition — edit `live_mode` here |
+| `.claude/skills/bayesian-hypothesis-live/CHANGELOG.md` | Version history (Traditional Chinese) |
+| `scripts/release.sh` | Packages the skill and publishes to GitHub Releases |
+| `tests/` | E2E behavior tests for the live_mode switch |
+| `server.js` | Live demo server — file watcher + SSE + static files |
+| `public/index.html` | Live demo frontend — animated probability bars |
+| `bayes_state.json` | Shared state written by skill (live mode only) |
