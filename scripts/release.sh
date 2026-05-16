@@ -28,10 +28,23 @@ zip -r "$ZIP_NAME" "$SKILL_DIR"
 echo "Created ${ZIP_NAME}"
 
 # Extract release notes: content under the current version's ## header
-NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" "$CHANGELOG_FILE")
-if [[ -z "$NOTES" ]]; then
+CHANGELOG_NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" "$CHANGELOG_FILE")
+if [[ -z "$CHANGELOG_NOTES" ]]; then
   echo "Warning: no CHANGELOG entry found for version ${VERSION}, releasing without notes."
 fi
+
+# Append installation instruction in Chinese
+INSTALL_INSTRUCTION="## 安裝方式
+
+下載 zip 後，告訴你的 Claude Code：
+
+「幫我安裝這個 skill，zip 檔在這裡：~/Downloads/${ZIP_NAME}」"
+
+NOTES="${CHANGELOG_NOTES}
+
+---
+
+${INSTALL_INSTRUCTION}"
 
 # Create GitHub release and upload zip
 echo "Creating GitHub release ${TAG}..."
