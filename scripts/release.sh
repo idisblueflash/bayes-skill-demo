@@ -6,11 +6,15 @@ SKILL_DIR=".claude/skills/${SKILL_NAME}"
 SKILL_FILE="${SKILL_DIR}/SKILL.md"
 CHANGELOG_FILE="${SKILL_DIR}/CHANGELOG.md"
 
-# Read version from SKILL.md frontmatter
-VERSION=$(grep '^version:' "$SKILL_FILE" | awk '{print $2}' | tr -d '[:space:]')
-if [[ -z "$VERSION" ]]; then
-  echo "Error: could not read version from ${SKILL_FILE}" >&2
-  exit 1
+# Use argument if provided, otherwise read from SKILL.md frontmatter
+if [[ -n "${1:-}" ]]; then
+  VERSION="$1"
+else
+  VERSION=$(grep '^version:' "$SKILL_FILE" | awk '{print $2}' | tr -d '[:space:]')
+  if [[ -z "$VERSION" ]]; then
+    echo "Error: could not read version from ${SKILL_FILE}" >&2
+    exit 1
+  fi
 fi
 
 TAG="skill-v${VERSION}"
