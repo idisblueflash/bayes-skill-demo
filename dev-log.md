@@ -96,13 +96,29 @@ Claude Design 可以给出来class的名字方面后面调整
 需要展示一大段的总结建议。
 
 # May 16 Sat.
-## 给 Skill 加上版本号
-- [ ] 在 frontmatter 加上版本号
+
+## 给 Skill 加上版本号. Done
+- [x] 在 frontmatter 加上版本号
   - Claude Code 目前对 version 这个字段没有支持，不会自动更新版本。
   - 加上版本只是方便分发 skill 的时候方便用户分辨。
-- [ ] 增加 CHNAGELOG.md
-- [ ] 把历史版本编入
-## 制作打包发布的脚本
+- [x] 增加 CHANGELOG.md
+  - 如果只是自用，git log 足够
+  - 如果要发布 CHANGELOG 就很有用了
+- [x] 把历史版本编入（从 git log 重建，起点 0.1.0，目前 0.3.0）
+
+## 我应该在 CHANGELOG.md 文档里使用中文么？应该
+目标用户是北美非技术华人，他们需要读 CHANGELOG 来判断是否升级。
+中文降低阅读阻力，直接用繁体中文。
+
+## 制作打包发布的脚本？ Done
+- [x] 自动从 SKILL.md frontmatter 读取版本号
+- [x] 打包 skill 文件夹为 zip，上传到 GitHub Releases
+- [x] 自动从 CHANGELOG 提取对应版本的更新说明作为 Release Notes
+- [x] Release Notes 末尾自动附上中文安装指引，告诉用户对 Claude Code 说什么
+- [x] 支持传入版本号参数做测试发布（bash scripts/release.sh 0.1.0）
+- [x] zip 解开的路径 .claude/skills/... 对 Claude Code 友好，用户直接让 AI 装即可
+- [x] 正式发布 skill-v0.3.0 到 GitHub Releases
+
 ## 默认关闭 live 版本功能
 
 # NEXT:
