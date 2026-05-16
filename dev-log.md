@@ -125,12 +125,11 @@ Claude Design 可以给出来class的名字方面后面调整
 ## 默认关闭 live 版本功能？ 应该 Done (v0.5.0)
 - [x] 在 SKILL.md 顶部加上 live_mode: false 开关
 - [x] live_mode 只有 Developer 自己在 Meetup 演示时才开，社区用户永远不需要碰
-- [x] 用 Python 写 E2E 测试，通过 env var 注入 live_mode 值，不修改 SKILL.md
-  - 测试 fixture 只提供数据，不包含逻辑指令，逻辑交给 Skill 处理
-  - 使用 claude-haiku 降低 token 成本
-  - 不使用 --bare 标志（会禁用 OAuth 登录）
-- [x] 更新 README，以社区用户视角为主，live mode 单独放在 Developer Only 章节
-- [x] 发布 skill-v0.5.0 到 GitHub Releases
+- [x] env var 注入 live_mode 值，不改 SKILL.md 文件
+  - 测试的 fixture 里面不应该提供逻辑，只有数据，才能测试 Skill 的能力
+  - 使用 haiku 跑 E2E 测试，降低成本
+  - 不用 --bare（OAuth 会无效）
+
 
 # NEXT:
 
