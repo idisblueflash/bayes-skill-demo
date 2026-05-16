@@ -13,11 +13,11 @@ if ! grep -q "live_mode: false" "$SKILL_FILE"; then
   exit 0
 fi
 
-# Flip to true
-sed -i '' 's/live_mode: false/live_mode: true/' "$SKILL_FILE"
+# Flip only the config block value (anchored, no backticks) to true
+sed -i '' 's/^live_mode: false$/live_mode: true/' "$SKILL_FILE"
 
 # Ensure we restore on exit, even if the test fails
-restore() { sed -i '' 's/live_mode: true/live_mode: false/' "$SKILL_FILE"; }
+restore() { sed -i '' 's/^live_mode: true$/live_mode: false/' "$SKILL_FILE"; }
 trap restore EXIT
 
 # Remove any existing state file
@@ -27,7 +27,6 @@ rm -f "$STATE_FILE"
 claude -p "$(cat tests/fixtures/minimal_bayes_scenario.txt)" \
   --allowedTools "Write,Read" \
   --model claude-haiku-4-5-20251001 \
-  --bare \
   --output-format text \
   > /dev/null
 
