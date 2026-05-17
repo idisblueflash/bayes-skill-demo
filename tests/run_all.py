@@ -26,6 +26,7 @@ run_test("tests/test_json_structure.py")
 run_test("tests/test_cumulative_steps.py")
 run_test("tests/test_likelihood_table.py")
 run_test("tests/test_signal_sentence.py")
+run_test("tests/test_rolling_prior.py")
 
 print(f"Results: {passed} passed, {failed} failed")
 sys.exit(1 if failed > 0 else 0)
