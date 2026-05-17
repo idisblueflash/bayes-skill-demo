@@ -23,6 +23,7 @@ def run_test(script: str, env: dict = None):
 run_test("tests/test_live_mode.py", {"BAYES_LIVE_MODE": "false"})
 run_test("tests/test_live_mode.py", {"BAYES_LIVE_MODE": "true"})
 run_test("tests/test_json_structure.py")
+run_test("tests/test_cumulative_steps.py")
 
 print(f"Results: {passed} passed, {failed} failed")
 sys.exit(1 if failed > 0 else 0)

@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 state_file = "bayes_state.json"
-fixture = open("tests/fixtures/minimal_bayes_scenario.txt").read()
+fixture = open("tests/fixtures/two_evidence_scenario.txt").read()
 
 print("[test] JSON structure + math correctness (live_mode: true)")
 
