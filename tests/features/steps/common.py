@@ -32,7 +32,7 @@ def step_run_analysis(context):
 
     result = subprocess.run(
         ["claude", "-p", f"live_mode is {context.live_mode}.\n\n{context.fixture}",
-         "--allowedTools", "Write,Read",
+         "--allowedTools", "Write,Read,Bash",
          "--model", "claude-haiku-4-5-20251001",
          "--output-format", "text"],
         capture_output=True,

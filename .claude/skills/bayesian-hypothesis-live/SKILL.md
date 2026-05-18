@@ -1,6 +1,6 @@
 ---
 name: bayesian-hypothesis-live
-version: 0.5.1
+version: 0.6.0
 description: 用貝氏推斷逐步驗證假說。當使用者說「我有一個假設想驗證」、「幫我用貝氏分析這個問題」、「我想逐步收集證據來更新我的判斷」、「幫我設計競爭假說」，或者提供了一批論壇貼文／新聞／文章並希望系統性地從中提煉訊號時，立即啟動此技能。適用於任何需要從零散證據中歸納出有信心度結論的場景：產品分析、市場判斷、使用者研究、政策評估等。只要使用者想把一堆觀察變成一個有數字支撐的結論，就應該使用此技能。
 ---
 
@@ -125,7 +125,15 @@ live_mode: false
 
 若 `live_mode: false`，跳過此步驟。
 
-若 `live_mode: true`，立即使用 Write 工具將完整歷史寫入 `bayes_state.json`。每次寫入時，保留所有先前的 steps，並在陣列末尾追加本輪新 step。
+若 `live_mode: true`：
+
+1. 先使用 Bash 工具呼叫計算腳本，以步驟二的概似度（0–1 小數）和上一步後驗作為先驗，取得精確歸一化後驗：
+
+```bash
+python3 .claude/skills/bayesian-hypothesis-live/bayes_calc.py '{"priors": [p1, p2, ...], "likelihoods": [l1, l2, ...]}'
+```
+
+2. 使用 Write 工具將完整歷史寫入 `bayes_state.json`，posteriors 填入腳本輸出的值。每次寫入時，保留所有先前的 steps，並在陣列末尾追加本輪新 step。
 
 ```json
 {
