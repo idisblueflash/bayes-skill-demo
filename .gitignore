@@ -1,3 +1,5 @@
 .DS_Store
 bayes_state.json
 *.zip
+__pycache__/
+.pytest_cache/
