@@ -131,6 +131,44 @@ Claude Design 可以给出来class的名字方面后面调整
   - 不用 --bare（OAuth 会无效）
 
 
+# May 17–19
+
+## 我们可以为 Skill 加 E2E 测试么？可以，而且很有价值
+
+- 现有测试只覆盖 live_mode 开关，缺乏结构验证和数学正确性验证
+- 确定了可测试的行为清单（BDD 维度）：
+  - live_mode 开关控制文件写入 ✅
+  - JSON 结构完整性（steps、evidence、values 字段）✅
+  - 后验概率归一化（各步之和 ≈ 1.0）✅
+  - 累积写入（多条证据不覆写）✅
+  - 滚动先验（step N 的 prior = step N-1 的 posterior）✅
+  - 概似度表格出现在对话输出 ✅
+  - 方向性结论句出现在对话输出 ✅
+
+## fixture 只能包含数据，不能包含逻辑指令
+- 最初 fixture 写了"直接执行步骤三"、"使用 Write 工具"等指令
+- 这让测试验证的是 fixture 的指令，而不是 Skill 本身的行为
+- 改为纯数据格式（假说 + 先验 + 证据），Skill 自己决定要不要写文件
+- 加入"框架已确定，请直接分析"作为用户意图，让 Skill 跳过确认步骤进入分析
+
+## 迁移到 behave BDD 框架（v0.5.2 → v0.5.1 commit，v0.6.0 release）
+- 用繁体中文写 Gherkin feature files，同时作为测试和技能使用文档
+- 3 个 feature 文件：live_mode.feature / evidence_update.feature / bayes_math.feature
+- 共同 step definitions 在 tests/features/steps/common.py
+- 用 uv 管理 Python 依赖（behave + pytest）
+- npm test → uv run behave
+
+## 提取贝叶斯计算为独立 Python 脚本（v0.6.0）
+- 问题：LLM 心算多假说归一化偶发误差（实测最高 ~10pp），会导致错误的阈值判断
+- 方案：bayes_calc.py 接收 priors + likelihoods，输出精确归一化后验
+- 放在 .claude/skills/ 目录下，随 zip 一起发布
+- v0.6.0：只在 live_mode=true 时调用（写 JSON 前）
+- v0.7.0：无论 live_mode 为何都必须调用（禁止 LLM 心算后验）
+
+## 为 bayes_calc.py 加 pytest 单元测试（v0.7.0）
+- 8 个 UT：归一化、贝叶斯数学正确性、均匀概似度保持先验、错误处理
+- 新 BDD 场景：live_mode=false 时对话输出的后验也应精确归一化
+
 # NEXT:
 
 ## 同时发布 Subagent ？
@@ -138,7 +176,5 @@ Claude Design 可以给出来class的名字方面后面调整
 ## 永远把主题问题显示在页面顶端?
 
 ## 更多的自定义的假设是否支持？
-
-## 我们是否应该设计脚本来单独计算后验来保证准确？
 
 

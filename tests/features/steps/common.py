@@ -53,9 +53,20 @@ def step_file_written(context):
     assert context.state is not None, "bayes_state.json was not written"
 
 
-@then("輸出應包含概似度表格")
-def step_has_likelihood_table(context):
-    assert "| 概似度 |" in context.output, "likelihood table not found in output"
+@then("輸出應包含後驗摘要行")
+def step_has_posterior_summary(context):
+    assert "更新後" in context.output, "'更新後' summary line not found in output"
+
+
+@then("對話輸出的後驗應精確歸一化")
+def step_output_posteriors_normalized(context):
+    import re
+    match = re.search(r'更新後[：:](.*)', context.output)
+    assert match, "no '更新後：' line found in output"
+    percentages = re.findall(r'(\d+(?:\.\d+)?)\s*%', match.group(1))
+    assert percentages, "no percentages found in '更新後：' line"
+    total = sum(float(p) for p in percentages)
+    assert abs(total - 100.0) <= 2.0, f"posteriors in output sum to {total:.1f}%, expected ~100%"
 
 
 @then("輸出應包含方向性結論句")
