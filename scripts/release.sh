@@ -22,9 +22,9 @@ ZIP_NAME="${SKILL_NAME}-v${VERSION}.zip"
 
 echo "Packaging ${SKILL_NAME} v${VERSION}..."
 
-# Build zip from skill folder contents
+# Build zip from skill folder contents (exclude Python cache)
 rm -f "$ZIP_NAME"
-zip -r "$ZIP_NAME" "$SKILL_DIR"
+zip -r "$ZIP_NAME" "$SKILL_DIR" -x "*/__pycache__/*" -x "*/*.pyc"
 echo "Created ${ZIP_NAME}"
 
 # Extract release notes: content under the current version's ## header
