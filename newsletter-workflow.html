@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>電子報寫作工作流程</title>
+<style>
+  :root {
+    --bg-0: #0c0e16;
+    --card: rgba(255, 255, 255, 0.04);
+    --card-border: rgba(255, 255, 255, 0.09);
+    --text: #e8ebf5;
+    --text-dim: #9aa3bd;
+    --text-faint: #6b7493;
+    --c1: #8b9bff;
+    --c2: #34d8c4;
+    --c3: #f5b454;
+    --c4: #f472b6;
+    --c5: #5fe39a;
+    --gold: #ffd479;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "PingFang SC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+    background: radial-gradient(1200px 700px at 80% -10%, #1d2335 0%, var(--bg-0) 55%) fixed;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 46px 20px 90px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 6px; }
+  h1 {
+    font-size: 33px; font-weight: 700; letter-spacing: -0.01em;
+    background: linear-gradient(100deg, #fff 10%, #aeb8e0 90%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .subtitle { color: var(--text-dim); font-size: 15px; margin-top: 11px; line-height: 1.5; }
+
+  .toolbar { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 24px 0 6px; flex-wrap: wrap; }
+  .run-btn {
+    border: none; cursor: pointer;
+    background: linear-gradient(120deg, var(--c1), var(--c4));
+    color: #0c0e16; font-weight: 650; font-size: 14px;
+    padding: 11px 22px; border-radius: 999px;
+    box-shadow: 0 8px 24px -8px rgba(139,155,255,0.6);
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+  }
+  .run-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 30px -8px rgba(139,155,255,0.7); }
+  .run-btn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: none; }
+  .hint { color: var(--text-faint); font-size: 13px; }
+  .hint b { color: var(--text-dim); font-weight: 600; }
+
+  .pipeline { margin-top: 28px; }
+
+  .stage {
+    position: relative; cursor: pointer;
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 18px;
+    padding: 22px 24px; display: grid; grid-template-columns: 52px 1fr; gap: 18px;
+    opacity: 0; transform: translateY(18px); animation: rise .55s forwards;
+    transition: border-color .3s, box-shadow .3s, transform .2s;
+    --accent: var(--c1);
+  }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  .stage:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+  .stage.active {
+    border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), 0 18px 50px -20px color-mix(in srgb, var(--accent) 80%, transparent);
+  }
+
+  .badge-num {
+    width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .stage-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .stage-title { font-size: 18px; font-weight: 650; }
+  .chip { font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; }
+  .chip.agent { color: var(--c1); background: color-mix(in srgb, var(--c1) 13%, transparent); border: 1px solid color-mix(in srgb, var(--c1) 32%, transparent); }
+  .chip.skill { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+  .chip .k { opacity: .7; font-weight: 500; }
+  .stage-desc { color: var(--text-dim); font-size: 14px; line-height: 1.6; margin-top: 9px; }
+
+  .io { display: flex; gap: 9px; align-items: center; margin-top: 14px; flex-wrap: wrap; font-size: 12.5px; }
+  .io .pill { padding: 5px 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); color: var(--text-dim); }
+  .io .arrow { color: var(--text-faint); }
+  .io .pill.out { color: var(--text); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+
+  .view-tag {
+    position: absolute; top: 16px; right: 18px; font-size: 11.5px; color: var(--text-faint);
+    display: inline-flex; align-items: center; gap: 5px; opacity: .8; transition: color .2s;
+  }
+  .stage:hover .view-tag, .agent:hover .view-tag2 { color: var(--accent); }
+
+  .connector { height: 30px; width: 2px; margin: 0 auto; background: var(--card-border); position: relative; }
+  .connector::after { content:""; position:absolute; inset:0; background: linear-gradient(var(--c1), var(--c4)); transform: scaleY(0); transform-origin: top; transition: transform .4s ease; }
+  .connector.flow::after { transform: scaleY(1); }
+
+  .agents { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(152px, 1fr)); gap: 12px; }
+  .agent {
+    position: relative; cursor: pointer;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 13px; padding: 14px 15px;
+    opacity: .6; transition: all .25s ease;
+  }
+  .agent:hover { opacity: 1; transform: translateY(-3px); border-color: color-mix(in srgb, var(--c5) 55%, transparent); }
+  .agent.active { opacity: 1; border-color: color-mix(in srgb, var(--c5) 60%, transparent); box-shadow: 0 10px 26px -16px var(--c5); }
+  .agent-name { font-size: 15px; font-weight: 650; color: var(--c5); }
+  .agent-role { font-size: 12px; font-weight: 600; color: var(--text); margin: 7px 0 5px; }
+  .agent-job { font-size: 12px; color: var(--text-faint); line-height: 1.5; }
+  .view-tag2 { margin-top: 9px; font-size: 11px; color: var(--text-faint); display: inline-flex; align-items: center; gap: 4px; }
+
+  .final {
+    margin-top: 14px; text-align: center; border-radius: 18px; padding: 26px;
+    background: linear-gradient(120deg, rgba(255,212,121,0.08), rgba(244,114,182,0.06));
+    border: 1px solid rgba(255,212,121,0.25);
+    opacity: 0; transform: translateY(18px); animation: rise .55s forwards; transition: box-shadow .4s;
+  }
+  .final.active { box-shadow: 0 0 0 1px rgba(255,212,121,0.4), 0 24px 60px -24px rgba(255,212,121,0.6); }
+  .final .label { font-size: 12px; letter-spacing: .14em; color: var(--gold); font-weight: 700; }
+  .final .title { font-size: 22px; font-weight: 700; margin-top: 8px; }
+  .final .note { color: var(--text-dim); font-size: 13.5px; margin-top: 8px; }
+
+  /* Modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(6,8,14,0.78); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center; padding: 28px;
+    opacity: 0; pointer-events: none; transition: opacity .22s; z-index: 50;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: min(760px, 100%); max-height: 90vh; overflow: auto;
+    background: #11141f; border: 1px solid var(--card-border); border-radius: 20px; padding: 24px;
+    transform: translateY(14px) scale(.98); transition: transform .25s; --accent: var(--c1);
+  }
+  .overlay.open .modal { transform: translateY(0) scale(1); }
+  .modal-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .modal-num { width: 44px; height: 44px; border-radius: 12px; flex: none; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+  .modal-title { font-size: 19px; font-weight: 700; }
+  .modal-tags { display: flex; gap: 8px; margin-top: 7px; flex-wrap: wrap; }
+  .modal-close { margin-left: auto; align-self: flex-start; background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: var(--text-dim); width: 34px; height: 34px; border-radius: 10px; font-size: 20px; cursor: pointer; line-height: 1; transition: all .2s; }
+  .modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+  .window { border: 1px solid var(--card-border); border-radius: 13px; overflow: hidden; background: #0c0e16; }
+  .window-bar { display: flex; align-items: center; gap: 7px; padding: 10px 13px; background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--card-border); }
+  .window-bar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .window-bar .url { margin-left: 10px; font-size: 12px; color: var(--text-faint); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .window-body { min-height: 300px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .window-body img { width: 100%; display: block; }
+  .shot-fallback { padding: 60px 24px; text-align: center; color: var(--text-faint); }
+  .shot-fallback .big { font-size: 15px; color: var(--text-dim); font-weight: 600; }
+  .shot-fallback .path { margin-top: 12px; font-size: 12.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); padding: 6px 12px; border-radius: 8px; display: inline-block; }
+  .shot-fallback .frame { width: 66px; height: 66px; margin: 0 auto 18px; border-radius: 16px; border: 2px dashed color-mix(in srgb, var(--accent) 50%, transparent); display:flex; align-items:center; justify-content:center; }
+  .modal-desc { color: var(--text-dim); font-size: 14px; line-height: 1.65; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>電子報寫作工作流程</h1>
+    <p class="subtitle">從一個想法，到一封可以發布的電子報 — 五個步驟，各由專屬 Skill 或 Sub-Agent 負責。</p>
+  </header>
+
+  <div class="toolbar">
+    <button class="run-btn" id="runBtn">▶ 播放流程</button>
+    <span class="hint">點擊任一步驟 → 彈出該步驟的 <b>實際操作畫面</b></span>
+  </div>
+
+  <div class="pipeline" id="pipeline"></div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-num" id="mNum">1</div>
+      <div>
+        <div class="modal-title" id="mTitle"></div>
+        <div class="modal-tags" id="mTags"></div>
+      </div>
+      <button class="modal-close" id="mClose">×</button>
+    </div>
+    <div class="window">
+      <div class="window-bar">
+        <i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+        <span class="url" id="mUrl"></span>
+      </div>
+      <div class="window-body" id="mBody"></div>
+    </div>
+    <p class="modal-desc" id="mDesc"></p>
+  </div>
+</div>
+
+<script>
+  const flow = [
+    { id:"s1", num:"1", accent:"var(--c1)", title:"驗證選題", agent:"Thomas", skill:"貝氏推斷",
+      src:"claude code · bayesian-hypothesis-live",
+      desc:"從一個粗略的想法開始。Thomas 用貝氏推斷設計競爭假說、逐條餵入證據、更新後驗機率，確認核心主張到底站不站得住腳。",
+      in:"一個想法", out:"帶信心度的主張", shot:"assets/demo/01-thomas-bayes.png" },
+    { id:"s2", num:"2", accent:"var(--c2)", title:"提煉 80 字摘要", agent:null, skill:"費曼 Skill",
+      src:"claude code · feynman-review",
+      desc:"用費曼的「誠實」標準，把驗證過的主張壓縮成 80 字。如果講不清楚，就代表還沒真正想通——這一步逼出真懂。",
+      in:"驗證過的主張", out:"80 字摘要", shot:"assets/demo/02-feynman.png" },
+    { id:"s3", num:"3", accent:"var(--c3)", title:"蒐集社群語料", agent:null, skill:"語料搜尋",
+      src:"corpus search · community",
+      desc:"到社群裡搜尋相關貼文、討論串與案例，讓摘要扎根在讀者真實的語言和關切上，而不是憑空想像。",
+      in:"80 字摘要", out:"相關語料", shot:"assets/demo/03-corpus.png" },
+    { id:"s4", num:"4", accent:"var(--c4)", title:"重構初稿", agent:null, skill:"McEnerney Skill",
+      src:"claude code · mcenerney-opening-review",
+      desc:"用 McEnerney 的「問題結構」重寫初稿：不穩定訊號、代價／收益、以及讀者需要被填補的 Gap，讓開篇就抓住人。",
+      in:"摘要＋語料", out:"結構化初稿", shot:"assets/demo/04-mcenerney.png" }
+  ];
+
+  const crew = [
+    { id:"a1", num:"5", accent:"var(--c5)", name:"Stone",  role:"結構檢查",   job:"審查整體結構與邏輯流。",            desc:"Stone 通讀整篇初稿，檢查段落順序、論證鏈是否完整、有沒有結構性的斷裂。", shot:"assets/demo/05-stone.png" },
+    { id:"a2", num:"5", accent:"var(--c5)", name:"Deva",   role:"刪廢句",     job:"移除沒有資訊量的填充句。",          desc:"Deva 逐句掃描，刪掉沒有資訊量的填充句、客套話與重複鋪陳，讓每一句都帶重量。", shot:"assets/demo/06-deva.png" },
+    { id:"a3", num:"5", accent:"var(--c5)", name:"Owen",   role:"口語化",     job:"把書面腔改寫成自然口語。",          desc:"Owen 把書面腔、翻譯腔改寫成自然的口語，讀起來像在跟讀者說話。", shot:"assets/demo/07-owen.png" },
+    { id:"a4", num:"5", accent:"var(--c5)", name:"Percy",  role:"補細節",     job:"把抽象句子變成具體、有畫面的描述。", desc:"Percy 找出抽象、空泛的句子，補上具體的例子、數字與畫面，讓讀者看得見。", shot:"assets/demo/08-percy.png" },
+    { id:"a5", num:"5", accent:"var(--c5)", name:"Vivian", role:"去重複結論", job:"刪掉前面已解釋過又重述的結論句。",  desc:"Vivian 抓出那些前面已經講清楚、結尾又重述一遍的結論句，避免讀者覺得囉嗦。", shot:"assets/demo/09-vivian.png" }
+  ];
+
+  const registry = {};
+  const pipeline = document.getElementById("pipeline");
+
+  function chipAgent(name) { return `<span class="chip agent"><span class="k">Agent</span> ${name}</span>`; }
+  function chipSkill(name) { return `<span class="chip skill"><span class="k">Skill</span> ${name}</span>`; }
+  function viewTag() {
+    return `<span class="view-tag">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      查看 Demo</span>`;
+  }
+
+  flow.forEach((s) => {
+    registry[s.id] = { num:s.num, accent:s.accent, title:s.title, agent:s.agent, skill:s.skill, src:s.src, desc:s.desc, shot:s.shot };
+    const el = document.createElement("div");
+    el.className = "stage";
+    el.dataset.id = s.id;
+    el.style.setProperty("--accent", s.accent);
+    el.innerHTML = `
+      ${viewTag()}
+      <div class="badge-num">${s.num}</div>
+      <div>
+        <div class="stage-head">
+          <span class="stage-title">${s.title}</span>
+          ${s.agent ? chipAgent(s.agent) : ""}
+          ${chipSkill(s.skill)}
+        </div>
+        <p class="stage-desc">${s.desc}</p>
+        <div class="io"><span class="pill">${s.in}</span><span class="arrow">→</span><span class="pill out">${s.out}</span></div>
+      </div>`;
+    pipeline.appendChild(el);
+    const c = document.createElement("div"); c.className = "connector"; pipeline.appendChild(c);
+  });
+
+  // Stage 5 — correction crew
+  const stage5 = document.createElement("div");
+  stage5.className = "stage";
+  stage5.style.cursor = "default";
+  stage5.style.setProperty("--accent", "var(--c5)");
+  stage5.innerHTML = `
+    <div class="badge-num">5</div>
+    <div>
+      <div class="stage-head">
+        <span class="stage-title">校正小組</span>
+        <span class="chip skill"><span class="k">Sub-Agents</span> 5 位專家 · 並行</span>
+      </div>
+      <p class="stage-desc">一組各司其職的 Sub-Agent 打磨結構化初稿，每位只做一件事、做到極致。點任一位看他的 Demo。</p>
+      <div class="agents" id="agents"></div>
+    </div>`;
+  pipeline.appendChild(stage5);
+
+  const agentsWrap = stage5.querySelector("#agents");
+  crew.forEach((a) => {
+    registry[a.id] = { num:a.num, accent:a.accent, title:a.name, agent:a.name, skill:a.role, src:`sub-agent · ${a.name}`, desc:a.desc, shot:a.shot };
+    const el = document.createElement("div");
+    el.className = "agent";
+    el.dataset.id = a.id;
+    el.innerHTML = `
+      <div class="agent-name">${a.name}</div>
+      <div class="agent-role">${a.role}</div>
+      <div class="agent-job">${a.job}</div>
+      <div class="view-tag2">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        查看 Demo</div>`;
+    agentsWrap.appendChild(el);
+  });
+
+  const conn = document.createElement("div"); conn.className = "connector"; pipeline.appendChild(conn);
+
+  const final = document.createElement("div");
+  final.className = "final";
+  final.innerHTML = `
+    <div class="label">產出</div>
+    <div class="title">可發布的電子報</div>
+    <div class="note">經過驗證 · 提煉 · 扎根語料 · 重構 · 五重打磨。</div>`;
+  pipeline.appendChild(final);
+
+  /* ---------- Modal ---------- */
+  const overlay = document.getElementById("overlay");
+  const modal = document.getElementById("modal");
+  const mNum = document.getElementById("mNum"), mTitle = document.getElementById("mTitle");
+  const mTags = document.getElementById("mTags"), mUrl = document.getElementById("mUrl");
+  const mBody = document.getElementById("mBody"), mDesc = document.getElementById("mDesc");
+
+  function fallback(shot, accent) {
+    return `<div class="shot-fallback">
+      <div class="frame" style="--accent:${accent}">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${'currentColor'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+      </div>
+      <div class="big">Demo 截圖待補</div>
+      <div class="path">${shot}</div>
+    </div>`;
+  }
+
+  function openModal(id) {
+    const d = registry[id];
+    if (!d) return;
+    modal.style.setProperty("--accent", d.accent);
+    mNum.textContent = d.num;
+    mTitle.textContent = d.title;
+    mTags.innerHTML = (d.agent ? chipAgent(d.agent) : "") + chipSkill(d.skill);
+    mUrl.textContent = d.src;
+    mDesc.textContent = d.desc;
+    mBody.innerHTML = fallback(d.shot, d.accent);
+    // try to load the real screenshot; reveal it if present
+    const img = new Image();
+    img.onload = () => { mBody.innerHTML = ""; mBody.appendChild(img); };
+    img.onerror = () => {};
+    img.src = d.shot;
+    overlay.classList.add("open");
+  }
+  function closeModal() { overlay.classList.remove("open"); }
+
+  pipeline.addEventListener("click", (e) => {
+    const card = e.target.closest("[data-id]");
+    if (card) openModal(card.dataset.id);
+  });
+  document.getElementById("mClose").addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+  /* ---------- Run animation ---------- */
+  const runBtn = document.getElementById("runBtn");
+  const stageEls = [...pipeline.querySelectorAll(".stage")];
+  const connEls = [...pipeline.querySelectorAll(".connector")];
+  const agentEls = [...agentsWrap.querySelectorAll(".agent")];
+  const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function reset() {
+    stageEls.forEach(e => e.classList.remove("active"));
+    connEls.forEach(e => e.classList.remove("flow"));
+    agentEls.forEach(e => e.classList.remove("active"));
+    final.classList.remove("active");
+  }
+  async function run() {
+    runBtn.disabled = true; reset(); await wait(150);
+    for (let i = 0; i < 4; i++) {
+      stageEls[i].classList.add("active");
+      stageEls[i].scrollIntoView({ behavior:"smooth", block:"center" });
+      await wait(680);
+      connEls[i].classList.add("flow"); await wait(320);
+    }
+    stage5.classList.add("active");
+    stage5.scrollIntoView({ behavior:"smooth", block:"center" });
+    await wait(420);
+    for (const a of agentEls) { a.classList.add("active"); await wait(240); }
+    await wait(220);
+    connEls[connEls.length - 1].classList.add("flow"); await wait(320);
+    final.classList.add("active");
+    final.scrollIntoView({ behavior:"smooth", block:"center" });
+    await wait(400);
+    runBtn.disabled = false;
+  }
+  runBtn.addEventListener("click", run);
+</script>
+</body>
+</html>
