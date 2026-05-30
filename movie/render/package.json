@@ -1,0 +1,18 @@
+{
+  "name": "bayes-demo-progressbar-render",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "render": "remotion render src/index.ts Bar out/bar.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.465",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.465"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.29",
+    "typescript": "^5.9.3"
+  }
+}
