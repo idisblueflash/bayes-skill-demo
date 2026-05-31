@@ -15,6 +15,7 @@ window.WF = {
       desc: "從一個粗略的想法開始。Thomas 用貝氏推斷設計競爭假說、逐條餵入證據、更新後驗機率，確認核心主張到底站不站得住腳。",
       flow: ["人工智慧普及，知識工作消失了？", "設計競爭假說 A·B·C", "逐條餵入證據", "更新後驗機率", "帶信心度的主張 ★★★★☆"],
       io: { in: "一個想法", out: "帶信心度的主張" },
+      prompt: { cmd: "@draft.md", body: "Thomas 你看看" },
       shot: `assets/demo/01-thomas-bayes.png?v=${window.IMG_V}`
     },
     {
@@ -22,11 +23,12 @@ window.WF = {
       title: "提煉 80 字摘要", en: "Distill to 80 Characters",
       slug: "feynman",
       agent: null, skill: "費曼 Skill", src: "claude code · feynman-review",
-      pos: { x: 48.7, y: 39.2 }, ground: { x: 45, y: 43 },
+      pos: { x: 49.1, y: 41.2 }, ground: { x: 45, y: 43 },
       say: "如果一件事你講不清楚，就代表你還沒真正想通。把驗證過的主張壓縮成 80 字——逼出真懂。",
       desc: "用費曼的「誠實」標準，把驗證過的主張壓縮成 80 字。如果講不清楚，就代表還沒真正想通——這一步逼出真懂。",
       flow: ["驗證過的主張", "誠實檢驗：能不能講清楚？", "壓縮 · 去術語", "80 字摘要"],
       io: { in: "驗證過的主張", out: "80 字摘要" },
+      prompt: { cmd: "/feynman-80-words", body: "想法流水账能让人学得更快更多更快...把这些内容写在之前的疑问和小任务。" },
       shot: `assets/demo/02-feynman.png?v=${window.IMG_V}`
     },
     {
@@ -34,11 +36,12 @@ window.WF = {
       title: "蒐集社群語料", en: "Gather Community Corpus",
       slug: "corpus",
       agent: null, skill: "語料搜尋", src: "corpus search · community",
-      pos: { x: 71.7, y: 40.7 }, ground: { x: 72, y: 45 },
+      pos: { x: 71.3, y: 42.5 }, ground: { x: 72, y: 45 },
       say: "讀者真正在意什麼，用什麼語言說？我到社群裡搜尋貼文、討論串與案例，讓摘要扎根在真實的語言上。",
       desc: "到社群裡搜尋相關貼文、討論串與案例，讓摘要扎根在讀者真實的語言和關切上，而不是憑空想像。",
       flow: ["80 字摘要", "搜尋社群貼文 · 討論串", "比對讀者關切", "相關語料"],
       io: { in: "80 字摘要", out: "相關語料" },
+      prompt: { body: "查找关于学习 Vibe Coding 的时候学得慢，学不会，没效率停留在表面的内容。" },
       shot: `assets/demo/03-corpus.png?v=${window.IMG_V}`
     },
     {
@@ -51,6 +54,7 @@ window.WF = {
       desc: "用 McEnerney 的「問題結構」重寫初稿：不穩定訊號、代價／收益、以及讀者需要被填補的 Gap，讓開篇就抓住人。",
       flow: ["摘要 ＋ 語料", "不穩定訊號", "代價 ／ 收益", "填補 Gap", "結構化初稿"],
       io: { in: "摘要＋語料", out: "結構化初稿" },
+      prompt: { cmd: "@draft.md /mcenerney-opening-review", body: "" },
       shot: `assets/demo/04-mcenerney.png?v=${window.IMG_V}`
     },
     {
@@ -58,11 +62,12 @@ window.WF = {
       title: "校正小組", en: "The Correction Crew",
       slug: "crew",
       agent: null, skill: "Sub-Agents · 5 位專家", src: "sub-agents · parallel",
-      pos: { x: 53.3, y: 89 }, ground: { x: 46, y: 84 },
+      pos: { x: 53.5, y: 84.7 }, ground: { x: 46, y: 84 },
       say: "我們五人各司其職，每位只做一件事、做到極致。並行打磨這份結構化初稿，直到它可以發布。",
       desc: "一組各司其職的 Sub-Agent 打磨結構化初稿，每位只做一件事、做到極致。",
       crew: true,
       io: { in: "結構化初稿", out: "可發布的電子報" },
+      prompt: { cmd: "@draft.md", body: "走流程。" },
       shot: `assets/demo/05-crew.png?v=${window.IMG_V}`
     }
   ],

@@ -1,22 +1,10 @@
 /* Avatar — the character placed directly on the world map (no window chrome).
    On the MAP he uses the seated "studying at his desk" pose, planted on the
-   realm's map position (static — no floating). The standing pose is used in the
-   MainWindow popup. Click the figure or the prompt to open the popup. */
+   realm's map position. The standing pose is used in the MainWindow popup.
+   Click the figure or the prompt to open the popup. */
 const { useState: useStateAv } = React; // game-style on-map avatar
 
 const STAGE_W = 1280, STAGE_H = 720;
-const DRAG_THRESHOLD = 3;
-
-function pointerToStagePos(e) {
-  const stage = document.getElementById("stage");
-  if (!stage) return null;
-  const rect = stage.getBoundingClientRect();
-  const round1 = (v) => Math.round(v * 10) / 10;
-  return {
-    x: round1(((e.clientX - rect.left) / rect.width) * 100),
-    y: round1(((e.clientY - rect.top) / rect.height) * 100),
-  };
-}
 
 /* The figure — per-realm placeholder art that can be swapped by filename. Reused in MainWindow. */
 function AvatarFigure({ realm, pose = "stand", height = 430, hovered = false }) {
@@ -32,72 +20,28 @@ function AvatarFigure({ realm, pose = "stand", height = 430, hovered = false }) 
   );
 }
 
-function Avatar({ realm, position, active, dragging, onDragStart, onDragMove, onDragEnd, onOpen }) {
+function Avatar({ realm, active, onOpen }) {
   const [hov, setHov] = useStateAv(false);
-  const drag = React.useRef({ pointerId: null, startX: 0, startY: 0, moved: false, suppressClick: false });
   const label = realm.agent || realm.skill;
 
   // seated figure planted at the realm's map position
   const figH = 176;
   const figW = figH * 0.75;
-  const p = position || realm.pos;
-  const baseX = (p.x / 100) * STAGE_W;     // realm contact point (bottom-center)
-  const baseY = (p.y / 100) * STAGE_H;
-
-  const handlePointerDown = (e) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, moved: false, suppressClick: false };
-    onDragStart(realm.id);
-  };
-
-  const handlePointerMove = (e) => {
-    if (drag.current.pointerId !== e.pointerId) return;
-    const dx = e.clientX - drag.current.startX;
-    const dy = e.clientY - drag.current.startY;
-    if (Math.hypot(dx, dy) > DRAG_THRESHOLD) drag.current.moved = true;
-    const pos = pointerToStagePos(e);
-    if (pos) onDragMove(realm.id, pos);
-  };
-
-  const finishPointer = (e) => {
-    if (drag.current.pointerId !== e.pointerId) return;
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
-    const dx = e.clientX - drag.current.startX;
-    const dy = e.clientY - drag.current.startY;
-    if (Math.hypot(dx, dy) > DRAG_THRESHOLD) drag.current.moved = true;
-    const pos = pointerToStagePos(e) || p;
-    const moved = drag.current.moved;
-    drag.current.suppressClick = moved;
-    drag.current.pointerId = null;
-    onDragEnd(realm.id, pos, moved);
-  };
-
-  const handleClick = (e) => {
-    if (drag.current.suppressClick) {
-      drag.current.suppressClick = false;
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    onOpen();
-  };
+  const baseX = (realm.pos.x / 100) * STAGE_W;
+  const baseY = (realm.pos.y / 100) * STAGE_H;
 
   return (
     <div style={{
-      position: "absolute", inset: 0, zIndex: dragging ? 9 : active ? 7 : 6, pointerEvents: "none",
+      position: "absolute", inset: 0, zIndex: active ? 7 : 6, pointerEvents: "none",
       opacity: active || hov ? 1 : 0.7, transition: "opacity .2s"
     }}>
       {/* ---- The seated figure, planted on the ground ---- */}
       <div
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={finishPointer}
-        onPointerCancel={finishPointer}
-        onClick={handleClick}
+        onClick={onOpen}
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
-        style={{ position: "absolute", left: baseX, top: baseY, transform: `translate(-50%, -100%) scale(${dragging ? 1.05 : 1})`,
-          cursor: dragging ? "grabbing" : "grab", pointerEvents: "auto", touchAction: "none", transition: dragging ? "none" : "transform .15s" }}
+        style={{ position: "absolute", left: baseX, top: baseY, transform: "translate(-50%, -100%)",
+          cursor: "pointer", pointerEvents: "auto" }}
       >
         {/* soft contact shadow on the ground */}
         <div style={{

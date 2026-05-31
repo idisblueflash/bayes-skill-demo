@@ -125,10 +125,10 @@ function MainWindow({ realm, crew, subSlug, subEditNum, onOpenSub, onSetSubEdit,
   return (
     <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{
       position: "absolute", inset: 0, zIndex: 45, display: "flex", alignItems: "center", justifyContent: "center",
-      padding: 30, background: "rgba(20,17,12,0.62)", backdropFilter: "blur(5px)",
+      padding: "30px 30px", background: "rgba(20,17,12,0.62)", backdropFilter: "blur(5px)",
     }}>
       <div style={{
-        width: "min(940px, 100%)", maxHeight: "calc(100% - 4px)", display: "flex", overflow: "hidden",
+        width: "min(940px, 100%)", height: 660, display: "flex", overflow: "hidden",
         background: "var(--vellum)", border: "1px solid var(--line-gold)", borderRadius: "var(--r-xl)",
         boxShadow: "var(--shadow-raise)", position: "relative", animation: "popIn .4s ease forwards",
       }}>
@@ -145,7 +145,7 @@ function MainWindow({ realm, crew, subSlug, subEditNum, onOpenSub, onSetSubEdit,
             fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 120, lineHeight: 1,
             color: "rgba(228,197,120,0.10)", pointerEvents: "none", userSelect: "none" }}>{realm.roman}</div>
           <div style={{ marginTop: 26, marginBottom: 0, zIndex: 1 }}>
-            <AvatarFigure realm={realm} height={420} />
+            <AvatarFigure realm={realm} height={realm.slug === "thomas" ? 360 : 420} />
           </div>
           {/* name banner */}
           <div style={{ width: "100%", padding: "14px 18px 18px", textAlign: "center", zIndex: 1,
@@ -176,7 +176,23 @@ function MainWindow({ realm, crew, subSlug, subEditNum, onOpenSub, onSetSubEdit,
             <Chip k="Out" v={realm.io.out} />
           </div>
 
-          <p style={{ fontFamily: "var(--font-han)", fontSize: 14.5, lineHeight: 1.7, color: "var(--ink)", margin: "0 0 20px" }}>{realm.desc}</p>
+          {(() => {
+            const prompt = realm.prompt || { cmd: "@draft.md", body: (realm.agent || realm.skill) + " 你看看" };
+            return (
+              <div style={{
+                fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--ink)",
+                background: "var(--cream)", border: "1px solid var(--line-gold)", borderRadius: "var(--r-sm)",
+                padding: "9px 13px", marginBottom: 14, boxShadow: "var(--shadow-card)",
+                display: "flex", alignItems: "flex-start", gap: 8, lineHeight: 1.5,
+              }}>
+                <span style={{ color: "var(--gold-deep)", fontWeight: 700, flex: "none" }}>&gt;</span>
+                <span style={{ minWidth: 0, wordBreak: "break-word" }}>
+                  {prompt.cmd && <><span style={{ color: "var(--gold-deep)" }}>{prompt.cmd}</span>{" "}</>}
+                  {prompt.body}
+                </span>
+              </div>
+            );
+          })()}
 
           {realm.crew ? (
             <React.Fragment>
@@ -187,15 +203,11 @@ function MainWindow({ realm, crew, subSlug, subEditNum, onOpenSub, onSetSubEdit,
               </div>
             </React.Fragment>
           ) : (
-            <React.Fragment>
-              <div style={{ fontFamily: "var(--font-caps)", letterSpacing: ".16em", textTransform: "uppercase",
-                fontSize: 11, color: "var(--gold-deep)", marginBottom: 12 }}>流程 · Pipeline</div>
-              <div style={{ marginBottom: 22 }}><FlowPipeline steps={realm.flow} /></div>
-
-              <div style={{ fontFamily: "var(--font-caps)", letterSpacing: ".16em", textTransform: "uppercase",
-                fontSize: 11, color: "var(--gold-deep)", marginBottom: 12 }}>他做了什麼 · The Demo</div>
-              <DemoShot src={realm.src} shot={realm.shot} />
-            </React.Fragment>
+            realm.slug === "thomas"    ? <BayesTerminal />
+            : realm.slug === "feynman"  ? <FeynmanTerminal />
+            : realm.slug === "corpus"   ? <CorpusTerminal />
+            : realm.slug === "mcenerney" ? <McenerneyTerminal />
+            : <DemoShot src={realm.src} shot={realm.shot} />
           )}
         </div>
       </div>

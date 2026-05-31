@@ -47,8 +47,6 @@ function App() {
   const WF = window.WF;
   const [route, setRoute] = useState(parseHash);
   const [highlightId, setHighlightId] = useState("r1");
-  const [posOverrides, setPosOverrides] = useState({});
-  const [draggingId, setDraggingId] = useState(null);
 
   const activeRealm = route.realmSlug ? WF.realms.find((r) => r.slug === route.realmSlug) : null;
 
@@ -76,35 +74,6 @@ function App() {
   const closeSub = () => navigate({ realmSlug: "crew" });
   const setSubEdit = (n) => navigate({ realmSlug: "crew", crewSlug: route.crewSlug, editNum: n });
 
-  const getRealmPos = (realm) => posOverrides[realm.id] || realm.pos;
-
-  const updateRealmPos = (id, pos) => {
-    setPosOverrides((prev) => ({ ...prev, [id]: pos }));
-  };
-
-  const startDrag = (id) => {
-    setDraggingId(id);
-  };
-
-  const endDrag = (id, pos, moved) => {
-    setDraggingId(null);
-    if (moved) console.log(`[pos] ${id} → { x: ${pos.x}, y: ${pos.y} }`);
-  };
-
-  useEffect(() => {
-    console.log("[dev] drag avatars to reposition; run dumpPositions() to print all coords");
-  }, []);
-
-  useEffect(() => {
-    window.dumpPositions = () => {
-      const lines = WF.realms.map((realm) => {
-        const pos = posOverrides[realm.id] || realm.pos;
-        return `${realm.id}: { x: ${pos.x.toFixed(1)}, y: ${pos.y.toFixed(1)} },`;
-      });
-      console.log(lines.join("\n"));
-    };
-  }, [WF.realms, posOverrides]);
-
   return (
     <div style={{ position: "absolute", inset: 0 }}>
       <MapStage realms={WF.realms} />
@@ -115,12 +84,7 @@ function App() {
         <Avatar
           key={realm.id}
           realm={realm}
-          position={getRealmPos(realm)}
           active={realm.id === highlightId}
-          dragging={realm.id === draggingId}
-          onDragStart={startDrag}
-          onDragMove={updateRealmPos}
-          onDragEnd={endDrag}
           onOpen={() => openRealm(realm.id)}
         />
       ))}
