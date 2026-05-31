@@ -109,8 +109,115 @@ window.WF = {
         ]
       }
     },
-    { id: "c2", slug: "deva",   name: "Deva",   role: "刪廢句",     job: "移除沒有資訊量的填充句。",          desc: "Deva 逐句掃描，刪掉沒有資訊量的填充句、客套話與重複鋪陳，讓每一句都帶重量。", shot: `assets/demo/06-deva.png?v=${window.IMG_V}` },
-    { id: "c3", slug: "owen",   name: "Owen",   role: "口語化",     job: "把書面腔改寫成自然口語。",          desc: "Owen 把書面腔、翻譯腔改寫成自然的口語，讀起來像在跟讀者說話。", shot: `assets/demo/07-owen.png?v=${window.IMG_V}` },
+    {
+      id: "c2", slug: "deva", name: "Deva", role: "刪廢句",
+      job: "把已演出的內容又用文字說一遍的廢句刪掉。",
+      desc: "Deva 用「Show Don't Tell」原則通讀全文，找出所有看破說破、翻譯比喻、重複交代和元評論的廢句，逐句刪掉,讓每一句都帶重量,讀者不再被多嘴的旁白打斷。",
+      shot: `assets/demo/06-deva.png?v=${window.IMG_V}`,
+      framework: {
+        title: "看破說破",
+        dims: ["說破感受", "翻譯比喻", "重複交代"]
+      },
+      audit: {
+        edits: [
+          {
+            dimIndex: 0, title: "刪「卻沒什麼深度」,讀者已感覺到沒深度",
+            file: "draft.md", line: 6, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "读完总结，感觉像是那么回事" },
+              { kind: "del",  text: "，却没什么深度" },
+              { kind: "keep", text: "。合上电脑，你还是说不上来新学的逻辑该怎么用。" }
+            ]
+          },
+          {
+            dimIndex: 2, title: "刪重述前面四項對比的總結句",
+            file: "draft.md", line: 54, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "子弹笔记（Bullet Journal）管的是你今天要做的事，重点是任务清单。卡片笔记（Zettelkasten）管的是已经想清楚的知识，一张卡片一个概念，还要互相链接。费曼学习法是你学完之后，用大白话讲给别人听，验证自己懂没懂。而流水账管的是你正在想的问题，没整理、没结论，按时间一条条排下去。" },
+              { kind: "del",  text: "前三个是「已经完成」的整理，流水账是「正在发生」的现场。" }
+            ]
+          },
+          {
+            dimIndex: 1, title: "刪比喻翻譯句,拋球畫面自己會說話",
+            file: "draft.md", line: 65, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "这好比你在完「空中抛球」。你不仅要接住别人抛来的新球，还不能让旧球落地。这两个动作同时在消耗注意力。" },
+              { kind: "del",  text: "一直接球的话，你的脑子里很快就转不动了。" },
+              { kind: "keep", text: "而把想法写下来，就是把旧球放下，空出手来能解更多的新球。" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      id: "c3", slug: "owen", name: "Owen", role: "口語化",
+      job: "把書面腔的句子改成自然口語,讓讀者像在跟朋友聊天。",
+      desc: "Owen 用「colloquial-review」原則通讀全文,找出所有新聞腔、報告腔、命令腔的句子,逐句替換成朋友吐槽、順口直說、輕鬆勸告的口語表達,讓文字讀起來不卡。",
+      shot: `assets/demo/07-owen.png?v=${window.IMG_V}`,
+      framework: {
+        title: "口語化",
+        dims: ["新聞腔", "報告腔", "命令腔"]
+      },
+      audit: {
+        edits: [
+          {
+            dimIndex: 0, title: "多處小修,從新聞腔變成朋友吐槽",
+            file: "draft.md", line: 8, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "del",  text: "让人奇怪的是" },
+              { kind: "add",  text: "奇怪了" },
+              { kind: "keep", text: "，你明明是社区" },
+              { kind: "del",  text: "的" },
+              { kind: "keep", text: "老人。" },
+              { kind: "del",  text: "这大半年也累积了" },
+              { kind: "add",  text: "大半年下来攒了" },
+              { kind: "keep", text: "几百小时，每" },
+              { kind: "del",  text: "月也花掉" },
+              { kind: "add",  text: "个月还烧掉" },
+              { kind: "keep", text: "大几百美金，" },
+              { kind: "del",  text: "但你" },
+              { kind: "keep", text: "到底在干啥" },
+              { kind: "del",  text: "呢" },
+              { kind: "keep", text: "？" }
+            ]
+          },
+          {
+            dimIndex: 1, title: "「其實問題出在」改成「說白了」,順口直說",
+            file: "draft.md", line: 10, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "del",  text: "其实问题出在" },
+              { kind: "add",  text: "说白了，" },
+              { kind: "keep", text: "你" },
+              { kind: "del",  text: "把" },
+              { kind: "add",  text: "是把" },
+              { kind: "keep", text: "思考" },
+              { kind: "del",  text: "这件事" },
+              { kind: "keep", text: "「外包」出去了。" }
+            ]
+          },
+          {
+            dimIndex: 2, title: "「記住不要」改成「千萬別」,別端著架子說話",
+            file: "draft.md", line: 82, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "del",  text: "记住不要" },
+              { kind: "add",  text: "千万别" },
+              { kind: "keep", text: "让 AI 帮你" },
+              { kind: "del",  text: "总结" },
+              { kind: "add",  text: "写" },
+              { kind: "keep", text: "。你可能会想，" },
+              { kind: "del",  text: "既然是要留下" },
+              { kind: "add",  text: "反正都是留个" },
+              { kind: "keep", text: "记录，" },
+              { kind: "del",  text: "那么为什么不让 AI 来写呢" },
+              { kind: "add",  text: "让 AI 写不就行了" },
+              { kind: "keep", text: "？还不" },
+              { kind: "del",  text: "会" },
+              { kind: "keep", text: "打断我和 Claude 的心流。" }
+            ]
+          }
+        ]
+      }
+    },
     {
       id: "c4", slug: "percy", name: "Percy", role: "補細節",
       job: "把抽象句變成具體、有畫面的描述。",
@@ -170,7 +277,48 @@ window.WF = {
         ]
       }
     },
-    { id: "c5", slug: "vivian", name: "Vivian", role: "去重複結論", job: "刪掉前面已解釋過又重述的結論句。",  desc: "Vivian 抓出那些前面已經講清楚、結尾又重述一遍的結論句，避免讀者覺得囉嗦。", shot: `assets/demo/09-vivian.png?v=${window.IMG_V}` }
+    {
+      id: "c5", slug: "vivian", name: "Vivian", role: "去重複結論",
+      job: "刪掉預告與抽象總結,讓畫面自己說話。",
+      desc: "Vivian 用「Show Don't Tell」原則通讀全文,抓出那些先告知再展示的鋪墊句、抽象總結,以及無力的抽象動詞,刪掉預告、換上有力的身體動詞,讓場景在讀者腦中自己發生。",
+      shot: `assets/demo/09-vivian.png?v=${window.IMG_V}`,
+      framework: {
+        title: "Show Don't Tell",
+        dims: ["不告知", "動詞畫面"]
+      },
+      audit: {
+        edits: [
+          {
+            dimIndex: 0, title: "刪「規矩很簡單」鋪墊,直接展示規則",
+            file: "draft.md", line: 12, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "这就是「想法流水账」。" },
+              { kind: "del",  text: "规矩很简单：" },
+              { kind: "keep", text: "一行一条，问题在前答案在后，按时间一条条往下排。" }
+            ]
+          },
+          {
+            dimIndex: 1, title: "把抽象「消耗注意力」換成「兩隻手繃著」",
+            file: "draft.md", line: 65, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "就像你在玩「空中抛球」。你不仅要接住别人抛来的新球，还不能让旧球落地。" },
+              { kind: "del",  text: "这两个动作同时在消耗注意力" },
+              { kind: "add",  text: "两只手同时绷着" },
+              { kind: "keep", text: "。" }
+            ]
+          },
+          {
+            dimIndex: 0, title: "刪抽象總結,讓「神經元被刺激」畫面自己說話",
+            file: "draft.md", line: 84, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "用自己的话写出来，" },
+              { kind: "del",  text: "是在主动产出。大脑" },
+              { kind: "keep", text: "神经元会被刺激，记得牢 20 - 24%。" }
+            ]
+          }
+        ]
+      }
+    }
   ],
 
   final: { label: "產出 · Output", title: "可發布的電子報", note: "驗證 · 提煉 · 扎根語料 · 重構 · 五重打磨。" }
