@@ -69,6 +69,18 @@ window.WF = {
       io: { in: "結構化初稿", out: "可發布的電子報" },
       prompt: { cmd: "@draft.md", body: "走流程。" },
       shot: `assets/demo/05-crew.png?v=${window.IMG_V}`
+    },
+    {
+      id: "r6", num: "6", roman: "Ⅵ", accent: "var(--realm-6)", accentHex: "#a85a4e",
+      title: "發佈電子報", en: "Publish",
+      slug: "published",
+      agent: null, skill: "電子報發佈", src: "newsletter · sent",
+      pos: { x: 84, y: 85 }, ground: { x: 82, y: 87 },
+      say: "全部打磨好了，按下發送。讀者的收件匣裡很快就能看到。",
+      desc: "一份打磨完成的電子報，從寫作工作流走出來，進入讀者的收件匣。",
+      io: { in: "可發布的電子報", out: "讀者收件匣" },
+      prompt: { cmd: "/publish", body: "把電子報寄出去。" },
+      shot: `assets/demo/06-published.png?v=${window.IMG_V}`
     }
   ],
 

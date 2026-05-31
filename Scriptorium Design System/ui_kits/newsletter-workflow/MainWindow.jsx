@@ -101,6 +101,57 @@ function Chip({ k, v, kind }) {
   );
 }
 
+const THANKS_CREDITS = [
+  { name: "Min",     initial: "M",  role: "「用 AI 發電」社區 + 管理員", note: "組織了這次寫作專題" },
+  { name: "張讀行",  initial: "讀", role: null,                          note: "建議用可視化展示寫作效果" },
+  { name: "文宣",    initial: "宣", role: null,                          note: "流程圖啟發了我的遊戲化展示" },
+  { name: "Betty",   initial: "B",  role: null,                          note: "FB 插圖設計啟發了我簡潔的細節展示" },
+  { name: "Keke",    initial: "K",  role: null,                          note: "啟發了開發 Corpus 工具" },
+];
+
+function ThanksCircle({ initial }) {
+  return (
+    <div style={{
+      width: 44, height: 44, borderRadius: "50%", flex: "none",
+      background: "linear-gradient(140deg, #c89a6a, #8a5e3a)",
+      border: "1px solid var(--line-gold)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700,
+      color: "var(--cream)",
+      boxShadow: "0 4px 10px -4px rgba(0,0,0,0.5)",
+    }}>{initial}</div>
+  );
+}
+
+function ThanksList() {
+  return (
+    <div style={{ padding: "2px 0" }}>
+      <div style={{ fontFamily: "var(--font-caps)", letterSpacing: ".16em",
+        textTransform: "uppercase", fontSize: 11, color: "var(--gold-deep)",
+        marginTop: 6, marginBottom: 6 }}>致謝 · Special Thanks</div>
+      <div style={{ fontFamily: "var(--font-han)", fontSize: 13, color: "var(--ink-dim)",
+        marginBottom: 18, lineHeight: 1.5 }}>
+        這份電子報能走完一整個工作流，是因為這些人——
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {THANKS_CREDITS.map((c) => (
+          <div key={c.name} style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+            <ThanksCircle initial={c.initial} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: "var(--font-han)", fontSize: 15, fontWeight: 700,
+                color: "var(--ink-strong)", lineHeight: 1.2 }}>{c.name}</div>
+              {c.role && <div style={{ fontFamily: "var(--font-han)", fontSize: 12,
+                color: "var(--gold-deep)", marginTop: 2 }}>{c.role}</div>}
+              <div style={{ fontFamily: "var(--font-han)", fontSize: 13.5,
+                color: "var(--ink)", marginTop: 3, lineHeight: 1.5 }}>{c.note}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MainWindow({ realm, crew, subSlug, subEditNum, onOpenSub, onSetSubEdit, onCloseSub, onClose }) {
   // Nested crew-member demo is driven by the routed `subSlug` (URL hash).
   const subMember = subSlug ? crew.find((m) => m.slug === subSlug) : null;
@@ -169,45 +220,51 @@ function MainWindow({ realm, crew, subSlug, subEditNum, onOpenSub, onSetSubEdit,
               alignItems: "center", justifyContent: "center" }}><IconClose /></button>
           </div>
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "14px 0 14px" }}>
-            {realm.agent && <Chip k="Agent" v={realm.agent} kind="agent" />}
-            <Chip k="Skill" v={realm.skill} kind="skill" />
-            <Chip k="In" v={realm.io.in} />
-            <Chip k="Out" v={realm.io.out} />
-          </div>
-
-          {(() => {
-            const prompt = realm.prompt || { cmd: "@draft.md", body: (realm.agent || realm.skill) + " 你看看" };
-            return (
-              <div style={{
-                fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--ink)",
-                background: "var(--cream)", border: "1px solid var(--line-gold)", borderRadius: "var(--r-sm)",
-                padding: "9px 13px", marginBottom: 14, boxShadow: "var(--shadow-card)",
-                display: "flex", alignItems: "flex-start", gap: 8, lineHeight: 1.5,
-              }}>
-                <span style={{ color: "var(--gold-deep)", fontWeight: 700, flex: "none" }}>&gt;</span>
-                <span style={{ minWidth: 0, wordBreak: "break-word" }}>
-                  {prompt.cmd && <><span style={{ color: "var(--gold-deep)" }}>{prompt.cmd}</span>{" "}</>}
-                  {prompt.body}
-                </span>
-              </div>
-            );
-          })()}
-
-          {realm.crew ? (
-            <React.Fragment>
-              <div style={{ fontFamily: "var(--font-caps)", letterSpacing: ".16em", textTransform: "uppercase",
-                fontSize: 11, color: "var(--gold-deep)", marginBottom: 12 }}>校正小組 · The Crew</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {crew.map((m) => <CrewMini key={m.id} member={m} onOpen={(mm) => onOpenSub(mm.slug)} />)}
-              </div>
-            </React.Fragment>
+          {realm.slug === "published" ? (
+            <ThanksList />
           ) : (
-            realm.slug === "thomas"    ? <BayesTerminal />
-            : realm.slug === "feynman"  ? <FeynmanTerminal />
-            : realm.slug === "corpus"   ? <CorpusTerminal />
-            : realm.slug === "mcenerney" ? <McenerneyTerminal />
-            : <DemoShot src={realm.src} shot={realm.shot} />
+            <React.Fragment>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "14px 0 14px" }}>
+                {realm.agent && <Chip k="Agent" v={realm.agent} kind="agent" />}
+                <Chip k="Skill" v={realm.skill} kind="skill" />
+                <Chip k="In" v={realm.io.in} />
+                <Chip k="Out" v={realm.io.out} />
+              </div>
+
+              {(() => {
+                const prompt = realm.prompt || { cmd: "@draft.md", body: (realm.agent || realm.skill) + " 你看看" };
+                return (
+                  <div style={{
+                    fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--ink)",
+                    background: "var(--cream)", border: "1px solid var(--line-gold)", borderRadius: "var(--r-sm)",
+                    padding: "9px 13px", marginBottom: 14, boxShadow: "var(--shadow-card)",
+                    display: "flex", alignItems: "flex-start", gap: 8, lineHeight: 1.5,
+                  }}>
+                    <span style={{ color: "var(--gold-deep)", fontWeight: 700, flex: "none" }}>&gt;</span>
+                    <span style={{ minWidth: 0, wordBreak: "break-word" }}>
+                      {prompt.cmd && <><span style={{ color: "var(--gold-deep)" }}>{prompt.cmd}</span>{" "}</>}
+                      {prompt.body}
+                    </span>
+                  </div>
+                );
+              })()}
+
+              {realm.crew ? (
+                <React.Fragment>
+                  <div style={{ fontFamily: "var(--font-caps)", letterSpacing: ".16em", textTransform: "uppercase",
+                    fontSize: 11, color: "var(--gold-deep)", marginBottom: 12 }}>校正小組 · The Crew</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    {crew.map((m) => <CrewMini key={m.id} member={m} onOpen={(mm) => onOpenSub(mm.slug)} />)}
+                  </div>
+                </React.Fragment>
+              ) : (
+                realm.slug === "thomas"    ? <BayesTerminal />
+                : realm.slug === "feynman"  ? <FeynmanTerminal />
+                : realm.slug === "corpus"   ? <CorpusTerminal />
+                : realm.slug === "mcenerney" ? <McenerneyTerminal />
+                : <DemoShot src={realm.src} shot={realm.shot} />
+              )}
+            </React.Fragment>
           )}
         </div>
       </div>

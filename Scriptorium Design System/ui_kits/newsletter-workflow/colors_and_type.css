@@ -41,12 +41,13 @@
   --on-navy-dim:    #b9bccb; /* muted text on navy                           */
   --on-navy-faint:  #7e8499; /* faint text on navy                           */
 
-  /* ===== HERALDIC STAGE ACCENTS (the 5 island-realms on the map) ========== */
+  /* ===== HERALDIC STAGE ACCENTS (the 6 island-realms on the map) ========== */
   --realm-1: #2b3447;  /* I   Navy      — 驗證選題 (Thomas · Bayes)          */
   --realm-2: #4a7d72;  /* II  Verdigris — 提煉摘要 (Feynman)                 */
   --realm-3: #9a6a3c;  /* III Amber     — 蒐集語料 (Corpus)                 */
   --realm-4: #6a5a82;  /* IV  Plum      — 重構初稿 (McEnerney)              */
   --realm-5: #6f7a55;  /* V   Moss      — 校正小組 (Sub-Agents)             */
+  --realm-6: #a85a4e;  /* VI  Terracotta — 發佈電子報 (Published)            */
 
   /* ===== SEMANTIC LINES & SHADOWS ========================================= */
   --line:        rgba(58, 48, 36, 0.18);   /* hairline divider on parchment  */
