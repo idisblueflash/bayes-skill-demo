@@ -1,7 +1,7 @@
 /* Newsletter Workflow — data model. Attached to window for cross-script (Babel) access. */
 window.WF = {
   title: "電子報寫作工作流程",
-  subtitle: "從一個想法，到一封可以發布的電子報 — 五個步驟，各由專屬 Skill 或 Sub-Agent 負責。",
+  subtitle: "",
 
   // Five island-realms. pos = % position of the marker over the map backdrop.
   realms: [

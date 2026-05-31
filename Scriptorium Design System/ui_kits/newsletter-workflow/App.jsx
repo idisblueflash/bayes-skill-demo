@@ -36,8 +36,10 @@ function Header({ title, subtitle }) {
       <div style={{ minWidth: 0 }}>
         <div style={{ fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 700, color: "var(--cream)",
           letterSpacing: ".01em", lineHeight: 1.05, textShadow: "0 2px 12px rgba(29,36,51,0.6)" }}>{title}</div>
-        <div style={{ fontFamily: "var(--font-han)", fontSize: 12.5, color: "var(--on-navy-dim)", marginTop: 4,
-          maxWidth: 560, textShadow: "0 1px 6px rgba(29,36,51,0.7)" }}>{subtitle}</div>
+        {subtitle && (
+          <div style={{ fontFamily: "var(--font-han)", fontSize: 12.5, color: "var(--on-navy-dim)", marginTop: 4,
+            maxWidth: 560, textShadow: "0 1px 6px rgba(29,36,51,0.7)" }}>{subtitle}</div>
+        )}
       </div>
     </div>
   );
@@ -76,7 +78,7 @@ function App() {
 
   return (
     <div style={{ position: "absolute", inset: 0 }}>
-      <MapStage realms={WF.realms} />
+      <MapStage />
       <Header title={WF.title} subtitle={WF.subtitle} />
 
       {/* Realm avatars stand directly on the map; click any one to open its main window. */}
