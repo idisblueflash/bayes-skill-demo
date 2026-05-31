@@ -111,7 +111,65 @@ window.WF = {
     },
     { id: "c2", slug: "deva",   name: "Deva",   role: "刪廢句",     job: "移除沒有資訊量的填充句。",          desc: "Deva 逐句掃描，刪掉沒有資訊量的填充句、客套話與重複鋪陳，讓每一句都帶重量。", shot: `assets/demo/06-deva.png?v=${window.IMG_V}` },
     { id: "c3", slug: "owen",   name: "Owen",   role: "口語化",     job: "把書面腔改寫成自然口語。",          desc: "Owen 把書面腔、翻譯腔改寫成自然的口語，讀起來像在跟讀者說話。", shot: `assets/demo/07-owen.png?v=${window.IMG_V}` },
-    { id: "c4", slug: "percy",  name: "Percy",  role: "補細節",     job: "把抽象句變成具體、有畫面的描述。", desc: "Percy 找出抽象、空泛的句子，補上具體的例子、數字與畫面，讓讀者看得見。", shot: `assets/demo/08-percy.png?v=${window.IMG_V}` },
+    {
+      id: "c4", slug: "percy", name: "Percy", role: "補細節",
+      job: "把抽象句變成具體、有畫面的描述。",
+      desc: "Percy 用「感知傳遞」原則通讀全文，找出抽象、空泛的句子，把它們換成具體的動作、內心獨白或場景對話，讓讀者用感官看見、聽見，而不是被告知。",
+      shot: `assets/demo/08-percy.png?v=${window.IMG_V}`,
+      framework: {
+        title: "感知傳遞",
+        dims: ["動作畫面", "內心獨白", "場景對話"]
+      },
+      audit: {
+        edits: [
+          {
+            dimIndex: 2, title: "把抽象判斷換成具體場景對話",
+            file: "draft.md", line: 6, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "del",  text: "你" },
+              { kind: "keep", text: "盯着那张花花绿绿的导图，" },
+              { kind: "del",  text: "看不懂" },
+              { kind: "add",  text: "箭头从「Agent」拉到「Context」，又拐回「Memory」，一圈下来你也不知道该先看哪" },
+              { kind: "keep", text: "。读完总结，" },
+              { kind: "del",  text: "感觉像是那么回事" },
+              { kind: "add",  text: "每段话都点头" },
+              { kind: "keep", text: "，合上电脑，" },
+              { kind: "del",  text: "你还是说不上来新学的逻辑该怎么用" },
+              { kind: "add",  text: "朋友问你 Claude Code 的 Skill 到底解决了啥，你张嘴半天，挤出一句「就是……让它更聪明吧」" },
+              { kind: "keep", text: "。" }
+            ]
+          },
+          {
+            dimIndex: 1, title: "把抽象「默念」換成內心獨白",
+            file: "draft.md", line: 63, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "Baddelay 和 Hitch 还发现了一件更糟糕的事：哪怕上面那 4 个，你也要" },
+              { kind: "del",  text: "不停地" },
+              { kind: "keep", text: "在脑子里" },
+              { kind: "del",  text: "默念" },
+              { kind: "add",  text: "反复念「待会儿要重构那个函数、待会儿要重构那个函数」" },
+              { kind: "keep", text: "，" },
+              { kind: "del",  text: "才不会忘记" },
+              { kind: "add",  text: "一停下就忘" },
+              { kind: "keep", text: "。" }
+            ]
+          },
+          {
+            dimIndex: 0, title: "把假心流換成具體動作畫面",
+            file: "draft.md", line: 88, source: "ch02 · 想法流水帳",
+            parts: [
+              { kind: "keep", text: "你有没有想过，你可能在跑一个假的心流。你一个晚上" },
+              { kind: "del",  text: "和 AI 一起砍瓜切菜，所有问题都被 AI 解决了" },
+              { kind: "add",  text: "回车按到手指发酸，红色报错变绿色、绿色再冒红色，AI 一轮轮把坑填上" },
+              { kind: "keep", text: "。但是第二天你回想起来，" },
+              { kind: "del",  text: "好像自己没学到什么东西" },
+              { kind: "add",  text: "问自己到底改了哪几个文件、为啥那么改，脑子一片空白" },
+              { kind: "keep", text: "。" }
+            ]
+          }
+        ]
+      }
+    },
     { id: "c5", slug: "vivian", name: "Vivian", role: "去重複結論", job: "刪掉前面已解釋過又重述的結論句。",  desc: "Vivian 抓出那些前面已經講清楚、結尾又重述一遍的結論句，避免讀者覺得囉嗦。", shot: `assets/demo/09-vivian.png?v=${window.IMG_V}` }
   ],
 
