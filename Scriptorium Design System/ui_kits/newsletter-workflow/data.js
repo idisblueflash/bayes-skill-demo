@@ -335,6 +335,46 @@ window.WF = {
           }
         ]
       }
+    },
+    {
+      id: "c6", slug: "de-ai-flavor", name: "De AI Flavor", role: "去 AI 味",
+      job: "把 AI 寫作的五種腔調抹掉,讓文字像人寫的。",
+      desc: "De AI Flavor 用「去 AI 味」五點清單通讀全文,抓出對仗宣判句、無氣味金句、三段排比、概念名詞化、以及缺乏具體錨點,逐句刪掉或改寫,讓讀者察覺不到背後有 AI 在打草稿。",
+      shot: `assets/demo/10-de-ai-flavor.png?v=${window.IMG_V}`,
+      framework: {
+        title: "去 AI 味",
+        dims: ["對仗排比", "無氣味金句", "三段排比", "概念名詞化", "缺乏錨點"]
+      },
+      audit: {
+        edits: [
+          {
+            dimIndex: 0, title: "刪「不是『算』,是用『猜』的」對仗宣判句",
+            file: "draft.md", line: 9, source: "extract-script-from-skill · 草稿",
+            parts: [
+              { kind: "keep", text: "我刚开始的时候偷懒,让 AI 自己计算概率。它算出来分数看上去像那么回事,我也没深究。直到有一天我给 Skill 加上了测试,才发现问题。" },
+              { kind: "del",  text: "它不是在「算」下一轮的概率,它是用「猜」的。" },
+              { kind: "keep", text: "根据 LLM 的训练原理,它会保守地「猜」。它不爱给极端的数字,本该是 0.9 的结果,它会保守地给你 0.75;本该是 0.1 的,它给你 0.25。" }
+            ]
+          },
+          {
+            dimIndex: 1, title: "刪結尾「讓 LLM 的歸 LLM」零熱量金句",
+            file: "draft.md", line: 33, source: "extract-script-from-skill · 草稿",
+            parts: [
+              { kind: "keep", text: "回想一个你常用的 Skill,是不是有过上面提到的那些情况,如果是,就看看能不能拆出脚本来。" },
+              { kind: "del",  text: "让 LLM 的归 LLM,让脚本的归脚本。" },
+              { kind: "keep", text: "如果你也在用 Vibe Coding 做 App / Skill,欢迎来 Discord 群..." }
+            ]
+          },
+          {
+            dimIndex: 2, title: "拆「有些活…有些活」三段排比結構",
+            file: "seo.md", line: 7, source: "extract-script-from-skill · SEO 摘要",
+            parts: [
+              { kind: "del",  text: "有些活,脚本比 LLM 快百倍,还一分 token 不多花。有些活,脚本根本做不了,硬拆只会把 Skill 变成一堆没用的零件。" },
+              { kind: "add",  text: "遇到能找到现成算法的,直接让脚本做,快百倍还不多花 token。但不是所有东西都该拆,硬拆反而把 Skill 变成一堆没用的零件。" }
+            ]
+          }
+        ]
+      }
     }
   ],
 
